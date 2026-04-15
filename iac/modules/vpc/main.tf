@@ -1,33 +1,35 @@
+#vpc.tf
 resource "aws_vpc" "pilot_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr
   enable_dns_support = true
   enable_dns_hostnames = true
   tags = {
     Name = "pilot_vpc"
   }
 }
-
+#subnet1
 resource "aws_subnet" "public_subnet1" {
   vpc_id = aws_vpc.pilot_vpc.id
-  cidr_block = "10.0.0.0/24"
+  cidr_block = var.subnet1_cidr
  
-  availability_zone = "ap-northeast-2a"
+  availability_zone = var.az_a
 
   tags = {
     Name = "public_subnet1"
   }
 }
-
+#subnet2
 resource "aws_subnet" "public_subnet2" {
   vpc_id = aws_vpc.pilot_vpc.id
-  cidr_block = "10.0.1.0/24"
+  cidr_block = var.subnet2_cidr
 
-  availability_zone = "ap-northeast-2b"
+  availability_zone = var.az_b
 
   tags = {
     Name = "public_subnet2"
   }
 }
+#igw
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.pilot_vpc.id
 
@@ -35,6 +37,7 @@ resource "aws_internet_gateway" "gw" {
     Name = "pilot_igw"
   }
 }
+#route table
 resource "aws_route_table" "pilot_public_rt" {
   vpc_id = aws_vpc.pilot_vpc.id
 
@@ -46,6 +49,7 @@ resource "aws_route_table" "pilot_public_rt" {
     Name = "pilot_public_rt"
   }
 }
+#route table association
 resource "aws_route_table_association" "public_1" {
   subnet_id      = aws_subnet.public_subnet1.id
   route_table_id = aws_route_table.pilot_public_rt.id

@@ -1,7 +1,7 @@
 resource "aws_security_group" "pilot_sg" {
   name        = "pilot_sg"
   description = "infrapilot sg"
-  vpc_id      = aws_vpc.pilot_vpc.id
+  vpc_id      = var.vpc_id
 
   tags = {
     Name = "pilot_sg"
