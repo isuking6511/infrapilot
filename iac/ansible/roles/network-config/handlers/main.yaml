@@ -1,0 +1,8 @@
+---
+
+## Task 변경 되면 chrony 재시작 필요
+- name: restart chrony
+  ansible.builtin.systemd:
+    name: chrony
+    state: restarted
+

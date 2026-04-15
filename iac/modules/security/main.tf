@@ -8,6 +8,7 @@ resource "aws_security_group" "pilot_sg" {
   }
 }
 
+
 resource "aws_vpc_security_group_ingress_rule" "allow_https" {
   security_group_id = aws_security_group.pilot_sg.id
   cidr_ipv4         = "0.0.0.0/0"

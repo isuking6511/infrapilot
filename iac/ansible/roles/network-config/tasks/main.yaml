@@ -1,0 +1,163 @@
+---
+# TCP 튜닝
+
+# TCP 연결 대기열 크기 증가
+- name: TCP fast open 
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_fastopen
+    value: "3"
+    sysctl_set: true
+    reload: true
+
+# TCP wait 소켓 재사용
+- name: tcp_tw_reuse
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_tw_reuse
+    value: "1"
+    sysctl_set: true
+    reload: true
+# TCP 죽은 연결 빨리 감지
+- name: tcp_keepalive_time
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: "60" 
+    sysctl_set: true
+    reload: true
+# 죽은 연결 재확인 간격
+- name: tcp_keepalive_interval
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_intvl
+    value: "10"
+    sysctl_set: true
+    reload: true
+
+# 몇 번 확인 후 끊을지
+- name: tcp_keepalive_probes
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_probes
+    value: "6"
+    sysctl_set: true
+    reload: true
+# TCP SYN 공격 방지
+- name: tcp_syncookies
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_syncookies
+    value: "1"
+    sysctl_set: true
+    reload: true
+# ─── NTP 시간 동기화 ───────────────────
+# 매매 시간 정확성 높임
+
+- name: Install chrony
+  ansible.builtin.apt:
+    name: chrony
+    state: present
+
+- name: Configure chrony
+  ansible.builtin.copy:
+    content: |
+      # AWS 내부 NTP 서버 (가장 정확)
+      server 169.254.169.123 prefer iburst
+      # 백업
+      pool ntp.ubuntu.com iburst
+      # 시간 차이 1초 이상이면 즉시 보정
+      makestep 1.0 3
+      driftfile /var/lib/chrony/chrony.drift
+      rtcsync
+    dest: /etc/chrony/chrony.conf
+    mode: "0644"
+  notify: restart chrony
+
+- name: Enable chrony
+  ansible.builtin.systemd:
+    name: chrony
+    enabled: true
+    state: started
+
+# ─── UFW 방화벽 ────────────────────────
+# 최소한의 포트만 열어서 보안 강화
+- name: Install ufw
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+- name: UFW default deny incoming
+  community.general.ufw:
+    direction: incoming
+    policy: deny
+
+- name: UFW default allow outgoing
+  community.general.ufw:
+    direction: outgoing
+    policy: allow
+
+- name: Allow SSH
+  community.general.ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+
+- name: Allow HTTP
+  community.general.ufw:
+    rule: allow
+    port: "80"
+    proto: tcp
+
+- name: Allow HTTPS
+  community.general.ufw:
+    rule: allow
+    port: "443"
+    proto: tcp
+
+- name: Allow K3s API
+  community.general.ufw:
+    rule: allow
+    port: "6443"
+    proto: tcp
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+# ─── SSH 보안 강화 ─────────────────────
+
+# SSH 루트 로그인 금지, 패스워드 인증 비활성화로 보안 강화
+- name: Disable password authentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication"
+    line: "PasswordAuthentication no"
+  notify: restart sshd
+
+- name: Disable root login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin no"
+  notify: restart sshd
+
+# ─── fail2ban ──────────────────────────
+# SSH 공격 방지 위해 fail2ban 설치 및 설정
+- name: Install fail2ban
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+# SSH 공격 시 1시간 차단, 5회 실패 시 차단
+- name: Configure fail2ban
+  ansible.builtin.copy:
+    content: |
+      [sshd]
+      enabled = true
+      port = ssh
+      maxretry = 5
+      bantime = 3600
+      findtime = 600
+    dest: /etc/fail2ban/jail.local
+    mode: "0644"
+  notify: restart fail2ban
+
+- name: Enable fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: true
+    state: started

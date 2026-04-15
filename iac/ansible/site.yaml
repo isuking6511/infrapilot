@@ -2,34 +2,8 @@
 - name: infra pilot
   hosts: k3s-server
   become: true
-  tasks:
-    - name: install essential packages
-      ansible.builtin.apt:
-        name: [curl, git, htop, net-tools, jq, python3-pip]
-        state: present
-        update_cache: true
-        cache_valid_time: 3600 # 1시간 이내면 업데이트 스킵 
-      register: apt_status
-      retries: 5
-      delay: 10
-      until: apt_status is success
-   
-    - name: Restart k3s
-      ansible.builtin.systemd:
-        name: k3s
-        state: restarted
 
-
-    - name: install k3s
-      ansible.builtin.shell: |
-        curl -sfL https://get.k3s.io | sh -
-      args:
-        creates: /usr/local/bin/k3s
-    - name: wait for k3s to be ready
-      ansible.builtin.command: k3s kubectl get nodes -o json
-      register: k3s_nodes
-      changed_when: false
-    
-    - name: node output
-      ansible.builtin.debug:
-        msg: "{{k3s_nodes.stdout_lines}}"
+  roles:
+    - base-hardening
+    - k3s-install
+    - network-config

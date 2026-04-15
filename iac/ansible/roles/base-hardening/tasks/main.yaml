@@ -1,0 +1,11 @@
+---
+- name: install essential packages
+  ansible.builtin.apt:
+    name: [curl, git, htop, net-tools, jq, python3-pip]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  register: apt_status
+  retries: 5
+  delay: 10
+  until: apt_status is success
