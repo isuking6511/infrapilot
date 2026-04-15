@@ -1,4 +1,4 @@
 all:
   hosts:
     k3s-server:
-      ansible_host: 52.78.37.84   # EC2 퍼블릭 IP
+      ansible_host: 13.124.227.8  # EC2 퍼블릭 IP

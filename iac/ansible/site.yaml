@@ -5,15 +5,19 @@
   tasks:
     - name: install essential packages
       ansible.builtin.apt:
-        name:
-          - curl
-          - git
-          - htop
-          - net-tools
-          - jq
-          - python3-pip
+        name: [curl, git, htop, net-tools, jq, python3-pip]
         state: present
         update_cache: true
+        cache_valid_time: 3600 # 1시간 이내면 업데이트 스킵 
+      register: apt_status
+      retries: 5
+      delay: 10
+      until: apt_status is success
+   
+    - name: Restart k3s
+      ansible.builtin.systemd:
+        name: k3s
+        state: restarted
 
 
     - name: install k3s
