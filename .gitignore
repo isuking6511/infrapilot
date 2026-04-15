@@ -17,3 +17,9 @@
 
 # Docs
 .docs/
+
+# mcp
+.mcp.json
+
+#opsidian
+.opsidian/
