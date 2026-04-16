@@ -1,0 +1,50 @@
+{
+  "module": "Elliott_Wave_Neely_Method_Extensions",
+  "topic": "Basic_Neely_Extensions_and_Exceptions",
+  "description": "패턴의 완성도를 높이고 오독을 방지하기 위한 추세선(Trendlines) 작도 역학과 시간 법칙(Time Rule), 그리고 엄격한 규칙 속에서 허용되는 예외(Exception) 처리 알고리즘",
+
+  "Batch_11": {
+    "Trendline_Touch_Points_and_Dynamics": {
+      "description": "각 엘리엇 패턴에 맞는 기준 추세선을 작도하고, 가격이 이 선을 어떻게 터치하고 돌파하는지 판별하는 규칙",
+      "Impulsion_2_4_Line": {
+        "construction": "2번 파동의 끝점과 4번 파동의 끝점을 연결",
+        "rule_during_formation": "5번 파동이 진행되는 동안 가격은 2-4 추세선을 완벽히 하향 돌파(상승 충격파 기준)할 수 없음. (일시적인 휩소/거짓 돌파는 일부 허용되나 종가 마감 금지)",
+        "rule_after_completion": "충격파가 완성된 직후의 새로운 파동은, 5번 파동이 형성되는 데 걸린 시간(Time)과 같거나 더 짧은 시간 안에 2-4 추세선을 확실하게 돌파해야 함."
+      },
+      "Correction_0_B_Line": {
+        "construction": "A파동의 시작점(0점)과 B파동의 끝점을 연결",
+        "application": "지그재그(Zigzag)와 플랫(Flat) 패턴에 적용",
+        "rule_during_formation": "C파동이 진행되는 동안 가격은 0-B 추세선을 뚫고 나갈 수 없음.",
+        "rule_after_completion": "패턴 완료 후 이어지는 파동은 C파동이 형성된 시간보다 짧거나 같은 시간 내에 0-B 추세선을 돌파해야 함."
+      },
+      "Triangle_A_C_and_B_D_Lines": {
+        "construction": "A와 C의 끝점을 연결, B와 D의 끝점을 연결하여 수렴/확산 채널을 형성",
+        "rule": "E파동은 A-C 추세선을 터치하지 못하거나(미달) 살짝 돌파(False Breakout)하는 경우가 많으며, E파동 완료 후 가격은 B-D 추세선을 강하게 돌파해야 함."
+      }
+    },
+
+    "Time_Rules": {
+      "description": "파동 간의 시간(Time) 소요 비율을 비교하여 패턴의 정합성을 검증하는 법칙",
+      "Impulsion_Time_Rule": {
+        "condition": "2번 파동과 4번 파동의 형성 시간 비교",
+        "rule": "교대 법칙(Alternation)에 따라 2번 파동과 4번 파동은 형성 시간에 뚜렷한 차이가 나야 함 (일반적으로 한쪽이 다른 쪽보다 최소 1.618배 이상 길거나 짧음)."
+      },
+      "Correction_Time_Rule": {
+        "condition": "A, B, C 파동 간의 형성 시간 비교",
+        "rule": "B파동은 A파동과 C파동의 형성 시간과 명확한 수학적/피보나치 비율(예: 0.618, 1.0, 1.618 등)을 가지는 경향이 강함."
+      }
+    },
+
+    "Exception_Rules": {
+      "description": "일반적인 엘리엇 파동 규칙이 작동하지 않을 때 알고리즘이 적용해야 할 예외 허용 및 무효화 기준",
+      "Terminal_Impulse_Exception": {
+        "condition": "충격파의 5번 파동 위치나 C파동 위치에서 발생할 때",
+        "exception_rule": "일반 충격파의 '4번 파동은 2번 파동의 영역을 침범할 수 없다(Overlap Rule)'는 필수 규칙을 무시함. 터미널 패턴에서는 반드시 4번 파동과 2번 파동이 겹쳐야(Overlap) 함."
+      },
+      "Missing_the_Time_Target": {
+        "condition": "사후 검증(Post-pattern confirmation)에서 추세선 돌파 시간이 목표치(예: 5파나 C파 형성 시간)를 초과한 경우",
+        "agent_action": "기존에 구성한 패턴(Promotion)을 무효화하고, 해당 파동 그룹이 더 큰 복합 조정파(Complex Correction)의 일부인 X파(x-wave)일 가능성을 열어두고 카운팅을 처음부터 재평가(Re-evaluation)해야 함."
+      }
+    }
+  }
+}

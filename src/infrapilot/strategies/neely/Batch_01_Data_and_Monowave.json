@@ -1,0 +1,37 @@
+[
+  {
+    "pattern_name": "Impulsion_General_Rules",
+    "category": "Trending or Terminal",
+    "essential_price_rules": "Must be composed of exactly five (5) segments. The 2nd segment cannot retrace 100% of the 1st segment. The 4th segment cannot retrace 100% of the 3rd segment. The 3rd segment can never be the shortest of the three advancing segments (waves 1, 3, and 5).",
+    "extension_rule": "One of the advancing waves (1, 3, or 5) must be noticeably longer in price than all others, typically at least 161.8% of the next longest wave.",
+    "trading_action": "Wait for the 5-segment pattern to complete and confirm the extension rule before anticipating a trend reversal or correction."
+  },
+  {
+    "pattern_name": "Impulse_1st_Wave_Extension",
+    "category": "Impulsion",
+    "essential_price_rules": "Wave 1 is the longest wave, being at least 161.8% of Wave 3. Wave 3 must be longer than Wave 5.",
+    "time_rules": "Wave 2 usually consumes more time than Wave 4.",
+    "trading_action": "If Wave 1 extends, expect a deep correction for Wave 2. Do not go long immediately after Wave 1 completes."
+  },
+  {
+    "pattern_name": "Impulse_3rd_Wave_Extension",
+    "category": "Impulsion",
+    "essential_price_rules": "Wave 3 is the longest wave, being at least 161.8% of Wave 1. Wave 1 and Wave 5 tend to be equal in price and time.",
+    "time_rules": "Wave 4 often becomes complex and consumes more time than Wave 2.",
+    "trading_action": "If Wave 3 extends, prepare for a complex sideways correction in Wave 4. Breakout trading is viable after Wave 4 completes."
+  },
+  {
+    "pattern_name": "Impulse_5th_Wave_Extension",
+    "category": "Impulsion",
+    "essential_price_rules": "Wave 5 is the longest wave, being at least 161.8% of Wave 3. Wave 1 and Wave 3 tend to be equal in price and time.",
+    "time_rules": "Wave 4 must take more time and retrace more of the preceding wave than Wave 2.",
+    "trading_action": "Wait for Wave 5 to fully extend. A sharp and rapid reversal usually follows an extended 5th wave, offering a high-probability SHORT entry upon completion."
+  },
+  {
+    "pattern_name": "Correction_General_Rules",
+    "category": "Non-Trending",
+    "essential_price_rules": "Corrections generally consist of three (3) segments (a, b, c). They occur against the trend of one larger degree.",
+    "retracement_rule": "The first monowave of a Non-Directional period is always retraced more than 61.8%.",
+    "trading_action": "Do not trade the initial counter-trend move. Wait for at least 3 segments to complete before looking for entries in the direction of the main trend."
+  }
+]

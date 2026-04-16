@@ -1,0 +1,72 @@
+{
+  "module": "Elliott_Wave_Neely_Method_Advanced_Labels",
+  "topic": "Advanced_Progress_Label_Application",
+  "description": "표준 조정파(Flat, Zigzag, Triangle)가 시장의 모멘텀에 따라 변형될 때, 이를 식별하고 세분화된 고급 진행 기호를 부여하는 규칙 데이터베이스",
+
+  "Batch_13": {
+    "Flats_Subtypes": {
+      "description": "3-3-5 구조를 가지는 플랫 패턴의 8가지 주요 변형 (B파와 C파의 되돌림 비율에 따라 분류)",
+      "B_Failure_Flat": {
+        "condition": "B파가 A파를 61.8% 이상 81% 미만으로 되돌리고, C파가 A파의 끝을 넘어설 때",
+        "implication": "추세 방향으로의 약한 모멘텀 존재"
+      },
+      "C_Failure_Flat": {
+        "condition": "B파가 A파를 81% 이상 100% 미만으로 되돌리지만, C파가 A파의 끝을 넘어서지 못할 때",
+        "implication": "C파 방향으로의 모멘텀 상실"
+      },
+      "Common_Flat": {
+        "condition": "B파가 A파를 81% 이상 100% 미만으로 되돌리고, C파가 A파의 끝을 살짝 넘어설 때 (100% ~ 138.2%)",
+        "implication": "가장 표준적이고 중립적인 시장 상태"
+      },
+      "Double_Failure_Flat": {
+        "condition": "B파가 A파를 81% 미만으로 되돌리고, C파도 A파의 끝을 넘어서지 못할 때",
+        "implication": "양방향 모멘텀의 극단적 고갈"
+      },
+      "Elongated_Flat": {
+        "condition": "C파가 A파의 161.8% 이상으로 과도하게 연장될 때",
+        "implication": "복합 조정파(Complex Correction)의 일부이거나 터미널 패턴에 속할 확률이 높음"
+      },
+      "Irregular_Flat": {
+        "condition": "B파가 A파의 시작점을 넘어 101% 이상 138.2% 미만으로 되돌리고, C파가 A파의 끝을 넘어설 때",
+        "implication": "B파 방향의 강한 모멘텀이 존재함 "
+      },
+      "Irregular_Failure_Flat": {
+        "condition": "B파가 A파의 101% 이상으로 되돌리지만, C파가 A파의 끝을 넘어서지 못할 때",
+        "implication": "B파 방향의 모멘텀이 매우 강함을 의미"
+      },
+      "Running_Flat": {
+        "condition": "B파가 A파의 시작점을 크게 넘어 138.2% 이상 되돌리고, C파가 A파의 끝에 전혀 미치지 못할 때",
+        "implication": "상위 추세 방향으로의 극단적인 강세를 나타내는 Category 1 파워 등급 패턴 "
+      }
+    },
+
+    "Triangles_Subtypes": {
+      "description": "3-3-3-3-3 구조를 가지는 삼각수렴의 형태적 분류 및 기능적 제한성에 따른 세분화",
+      "By_Shape": {
+        "Contracting": "파동이 진행될수록 가격 진폭이 줄어드는 수렴형. 보통 B파가 A파보다 작음.",
+        "Expanding": "파동이 진행될수록 가격 진폭이 커지는 확산형. 보통 B파가 A파보다 큼."
+      },
+      "By_Function": {
+        "Limiting_Triangle": {
+          "condition": "충격파의 4파나 조정파의 B파처럼 패턴 내에서 특정 위치에 '제한적으로' 나타남.",
+          "characteristics": "E파 완료 후 가격이 삼각수렴의 가장 넓은 부분을 약간 넘어서는 수준(Thrust)으로 분출됨."
+        },
+        "Non_Limiting_Triangle": {
+          "condition": "복합 조정파의 마지막 X파 이후나 제한되지 않은 환경에서 발생.",
+          "characteristics": "분출(Thrust)의 크기가 삼각수렴의 폭에 의해 제한되지 않음."
+        }
+      },
+      "Running_Triangle": {
+        "condition": "B파가 A파의 시작점을 넘어선 후 수렴이 진행되는 형태",
+        "implication": "플랫의 Running형과 마찬가지로 추세 방향의 강한 에너지를 내포함."
+      }
+    },
+
+    "Zigzags_Subtypes": {
+      "description": "5-3-5 구조를 가지는 지그재그 패턴의 연장 및 미달 형태",
+      "Normal_Zigzag": "C파가 A파의 61.8% ~ 161.8% 사이에서 형성",
+      "Truncated_Zigzag": "C파가 A파의 38.2% 이상 형성되었으나 A파의 끝을 넘지 못할 때 (드물게 발생)",
+      "Elongated_Zigzag": "C파가 A파의 161.8%를 초과하여 연장될 때. (단, 이 경우 전체가 지그재그가 아니라 충격파의 일부일 가능성을 의심해야 함)"
+    }
+  }
+}

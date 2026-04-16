@@ -1,0 +1,34 @@
+{
+  "module": "Elliott_Wave_Neely_Method_Ultimate",
+  "topic": "Advanced_Neely_Extensions_and_Inference",
+  "description": "가장 복잡한 시장 상황에서 에이전트가 예외를 추론하고 미래의 가격 목표치를 극도로 정밀하게 산출하기 위한 최고급 확장 법칙, 채널링 기법, 그리고 누락/모방 파동의 역산 알고리즘",
+
+  "Batch_14": {
+    "Advanced_Channeling_Techniques": {
+      "description": "특정 파동에만 적용되는 고도의 채널링 기법으로, 패턴의 완성과 돌파를 확인하는 필수 역학 ",
+      "rules": {
+        "Wave_2_and_4_Channeling": "충격파 내부에서 2번과 4번 파동의 끝점을 연결하고, 이를 1번 또는 3번 파동의 끝점에서 평행하게 투사하여 가격의 최대 도달 범위와 정상적인 추세 궤도를 예측함.",
+        "Wave_B_Channeling": "조정파 내부에서 A파동의 시작점과 B파동의 끝점을 연결하여 채널을 형성, C파동이 어디서 종료될지 가늠하는 기준선으로 활용.",
+        "Terminal_Impulse_Channeling": "터미널 패턴(Ending Diagonal)에서는 1-3 추세선과 2-4 추세선이 수렴(Contracting)하거나 확산(Expanding)하는 형태를 띠며, 5번 파동이 1-3 추세선을 일시적으로 돌파(Throw-over)한 후 강하게 반전하는 특징을 확인함. "
+      }
+    },
+
+    "Advanced_Fibonacci_Relationships": {
+      "description": "단순한 황금비를 넘어, 파동 간의 내부(Internal) 및 외부(External) 구조를 연결하는 정밀 가격/시간 비율 계산",
+      "Internal_Relationships": "동일한 패턴 내부에 속한 파동들(예: 1파와 3파, A파와 C파) 간의 비율. 0.618, 1.0, 1.618, 2.618 등 핵심 수학적 비율이 성립해야 파동의 등급(Degree)이 같다고 인정됨.",
+      "External_Relationships": "서로 다른 패턴이나 인접하지 않은 파동(예: 이전 충격파 전체와 현재 조정파 전체) 간의 되돌림 또는 확장 비율. 주로 0.382, 0.618, 0.81 비율이 핵심 지지/저항 및 파워 등급 판단의 기준으로 작용."
+    },
+
+    "Missing_Waves_and_Emulation_Inference": {
+      "description": "실제 차트에서 파동이 생략되거나 다른 파동의 형태를 모방할 때 에이전트가 이를 역산하고 추론하는 최고급 로직 (Hallucination 방지 핵심)",
+      "Missing_Waves_Logic": {
+        "condition": "급등락, 갭(Gap), 또는 데이터의 한계로 인해 구조상 반드시 있어야 할 세부 파동이 보이지 않을 때.",
+        "agent_action": "단일 모노웨이브의 가격 길이가 비정상적으로 길거나 소요 시간이 과도하게 길다면, 이를 단순 모노웨이브가 아닌 '압축된 폴리웨이브(Compacted Polywave)'로 재분류해야 함. 이후 주변 파동의 논리(Batch 8, 9)를 역산하여 내부 구조(:3 또는 :5)를 수학적으로 추론해 내야 함."
+      },
+      "Emulation_Rule": {
+        "condition": "A파동이 B파동처럼 길게 늘어지거나, 충격파의 2파동이 복합 조정처럼 보여 시각적 형태만으로는 구조 파악에 혼선을 줄 때.",
+        "agent_action": "에이전트는 눈에 보이는 형태(Shape)에 의존하지 말고, 시간 법칙(Time Rule, Batch 11)과 파워 등급(Power Ratings, Batch 12)을 절대적 기준으로 우선 적용하여 해당 파동의 '진짜 기능과 역할'을 역추적(Reverse-engineer)해야 함."
+      }
+    }
+  }
+}

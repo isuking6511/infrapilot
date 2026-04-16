@@ -1,0 +1,22 @@
+{
+  "module": "Batch_02_Observation_and_Retracement",
+  "topic": "Rules_of_Observation_and_Retracement",
+  "description": "주변 파동(m0, m2 등)과의 크기/시간 비교를 통해 현재 파동(m1)의 성질을 식별하는 단계",
+  "rules": {
+    "Rules_of_Observation": {
+      "m1": "현재 분석 중인 모노웨이브",
+      "m0_m_minus1": "m1 이전에 발생한 과거 파동들",
+      "m2_m3": "m1 이후에 발생한 미래 파동들"
+    },
+    "Retracement_Rules": {
+      "Rule_1": "m2가 m1의 38.2% 미만 되돌림",
+      "Rule_2": "m2가 m1의 38.2% 이상에서 61.8% 미만 되돌림",
+      "Rule_3": "m2가 m1의 정확히 61.8% 되돌림",
+      "Rule_4": "m2가 m1의 61.8% 초과에서 100% 미만 되돌림",
+      "Rule_5": "m2가 m1의 100% 이상에서 161.8% 미만 되돌림",
+      "Rule_6": "m2가 m1의 161.8% 이상에서 261.8% 이하 되돌림",
+      "Rule_7": "m2가 m1의 261.8% 초과 되돌림"
+    },
+    "Condition_Identifiers": "m0와 m1의 비율에 따라 a, b, c, d, e 등의 세부 조건 식별자로 분기"
+  }
+}

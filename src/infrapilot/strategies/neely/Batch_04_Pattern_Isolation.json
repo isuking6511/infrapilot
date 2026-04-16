@@ -1,0 +1,32 @@
+[
+  {
+    "pattern_name": "Post_Constructive_Impulse",
+    "category": "Validation Rule",
+    "essential_price_rules": "After the 5th wave completes, the market must break the 2-4 trendline in less time than it took to form wave 5.",
+    "trading_action": "If the 2-4 trendline is broken quickly, it confirms the impulse is over. Prepare for a correction that will retrace at least back to the price territory of wave 4. Enter a counter-trend position upon trendline break."
+  },
+  {
+    "pattern_name": "Post_Constructive_Zigzag",
+    "category": "Validation Rule",
+    "essential_price_rules": "Following the completion of a Zigzag, the market must retrace at least 61.8% of the entire Zigzag.",
+    "trading_action": "If the market fails to retrace 61.8% after the assumed end of the C-wave, the pattern is likely incomplete (perhaps forming an x-wave) or part of a complex correction. Avoid entering long-term positions until the 61.8% retracement is achieved."
+  },
+  {
+    "pattern_name": "Post_Constructive_Flat",
+    "category": "Validation Rule",
+    "essential_price_rules": "A completed Flat correction must be fully retraced (100%) by the next market move.",
+    "trading_action": "If the assumed Flat is not fully retraced by the subsequent trend, the C-wave may still be developing, or the Flat is merely wave-A of a larger pattern. Wait for further confirmation before committing large capital."
+  },
+  {
+    "pattern_name": "Post_Constructive_Triangle",
+    "category": "Validation Rule",
+    "essential_price_rules": "The thrust following a Triangle must exceed the highest or lowest price achieved during the Triangle. It usually travels a distance equal to the widest segment of the Triangle.",
+    "trading_action": "Enter a trade in the direction of the thrust immediately after wave E completes. The profit target is the distance of the widest leg of the Triangle projected from the end of wave E."
+  },
+  {
+    "pattern_name": "Trendline_Touch_Points",
+    "category": "Validation Rule",
+    "essential_price_rules": "In an Impulse, a trendline drawn across the ends of waves 2 and 4 should not be broken by any part of wave 3 or 5 until the entire 5-wave pattern is over.",
+    "trading_action": "If the 2-4 trendline is broken prematurely by wave 5, the wave count is wrong. Re-evaluate the chart immediately and close any positions based on the flawed assumption."
+  }
+]

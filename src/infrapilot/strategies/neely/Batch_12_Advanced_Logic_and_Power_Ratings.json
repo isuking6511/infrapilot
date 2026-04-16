@@ -1,0 +1,52 @@
+{
+  "module": "Elliott_Wave_Neely_Method_Predictive",
+  "topic": "Advanced_Logic_Rules_and_Power_Ratings",
+  "description": "완성된 엘리엇 패턴의 내재적 강도(Power Rating)를 수치화 및 분류하여, 이어지는 다음 파동의 되돌림(Retracement) 비율과 시장의 방향성을 예측하는 고급 논리 규칙",
+
+  "Batch_12": {
+    "Concept_of_Power_Ratings": {
+      "description": "패턴의 구조적 특징(예: 미달, 연장, x파의 크기 등)에 따라 시장의 매수/매도 압력을 평가하는 시스템",
+      "agent_application": "패턴이 종료(Compaction 완료)된 후, 해당 패턴의 파워 등급을 확인하여 다음 파동의 최대/최소 되돌림 허용 범위를 설정해야 함."
+    },
+
+    "Power_Rating_Categories_and_Retracement_Rules": {
+      "Category_1_High_Power_Patterns": {
+        "definition": "기존 추세 방향으로 매우 강한 모멘텀을 내포한 패턴",
+        "included_patterns": [
+          "Double Zigzag (이중 지그재그)",
+          "Triple Zigzag (삼중 지그재그)",
+          "Elongated Flat (연장 플랫)",
+          "Running Flat (러닝 플랫)",
+          "Running Triangle (러닝 삼각수렴)"
+        ],
+        "expected_retracement": "패턴 완료 후 이어지는 반대 방향의 파동은 **절대 이전 패턴 전체를 100% 되돌릴 수 없으며, 대부분 61.8% 미만의 얕은 되돌림**에 그친 후 원래 추세로 강하게 복귀함."
+      },
+      
+      "Category_2_Normal_Power_Patterns": {
+        "definition": "시장의 정상적인 에너지 균형을 보여주는 표준 패턴",
+        "included_patterns": [
+          "Standard Zigzag (표준 지그재그)",
+          "Common Flat (일반 플랫)",
+          "Trending Impulse (일반 추세 충격파)"
+        ],
+        "expected_retracement": "다음 파동은 일반적으로 **61.8% ~ 81% 수준의 정상적인 피보나치 되돌림**을 보이며, 조건에 따라 100% 되돌림도 가능함."
+      },
+
+      "Category_3_Weak_Power_Patterns_Exhaustion": {
+        "definition": "기존 추세의 에너지가 완전히 고갈(Exhaustion)되었음을 암시하는 패턴",
+        "included_patterns": [
+          "Terminal Impulse (터미널 충격파 / Ending Diagonal)",
+          "C-Failure Flat (C파 미달 플랫)",
+          "Contracting Triangle (수렴형 삼각수렴의 E파 완료 후 분출 끝자락)"
+        ],
+        "expected_retracement": "패턴 완료 후 시장은 급격하게 반전하며, **이전 패턴이 형성된 시간보다 훨씬 짧은 시간 안에 패턴 전체를 100% 이상(때로는 그 이상) 완전히 되돌리는 강력한 역추세 파동**이 발생함."
+      }
+    },
+
+    "Logic_Rules_for_Missing_Waves_and_Emulation": {
+      "description": "차트상 파동이 생략되거나(Missing), A파가 B파처럼 행동하는 모방(Emulation) 현상에 대한 논리적 처리",
+      "Missing_Wave_Rule": "급격한 시장 움직임(갭 상승/하락 등)으로 인해 필수적인 세부 파동이 보이지 않을 경우, 에이전트는 해당 구간을 단일 모노웨이브가 아닌 '압축된 폴리웨이브'로 간주하고 주변 파동의 파워 등급을 통해 생략된 구조를 역산(Reverse-engineer)해야 함.",
+      "Emulation_Rule": "특정 파동이 자신의 본래 역할과 다른 특성을 보일 때(예: 충격파 내부의 2파가 너무 복잡해져서 조정파의 B파처럼 보일 때), 시간/가격 룰(Batch 11)을 우선 적용하여 형태적 속임수를 걸러냄."
+    }
+  }
+}

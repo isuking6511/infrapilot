@@ -1,0 +1,48 @@
+[
+  {
+    "pattern_name": "NeoWave_Fractal_Engine",
+    "category": "System_Master_Architecture",
+    "essential_price_rules": "모든 파동은 4단계의 계층 구조를 가짐. 파동의 해석은 반드시 제일 하위 구조인 Level_0에서 시작하여 조건 충족 시 다음 Level로 승격(Integration)됨.",
+    "relational_links": {
+      "Level_0": "Monowave (최소 단위의 단일 파동, 내부 구조 없음)",
+      "Level_1": "Polywave (3개 또는 5개의 Monowave가 결합된 표준 Impulse 또는 Correction)",
+      "Level_2": "Multiwave (Polywave가 하나 이상 포함되어 세분화된 거대한 패턴)",
+      "Level_3": "Macrowave (수개월~수년에 걸쳐 형성되는 초대형 복합 패턴)"
+    },
+    "trading_action": "봇은 항상 Level_0 (Monowave) 데이터부터 수집하여 Retracement Rules(되돌림 규칙)을 적용한 뒤, 이를 상위 Level로 조립하는 상향식(Bottom-up) 분석을 수행해야 함."
+  },
+  {
+    "pattern_name": "Mathematical_Retracement_Core",
+    "category": "Level_0_Monowave_Analysis",
+    "essential_price_rules": "현재 파동(m1)의 내부 구조(:3 또는 :5)를 파악하기 위해, 직후의 파동(m2)이 m1을 몇 % 되돌리는지(Retracement) 계산하여 규칙을 매핑함.",
+    "relational_links": [
+      {"condition": "m2 < 38.2% of m1", "triggers": "Rule_1", "output_structure": [":5", ":c3", "x:c3", ":sL3", ":s5"]},
+      {"condition": "38.2% <= m2 < 61.8%", "triggers": "Rule_2", "output_structure": [":5", ":sL3", ":c3", ":s5"]},
+      {"condition": "m2 == 61.8%", "triggers": "Rule_3", "borderline_state": "Requires deep m0 analysis"},
+      {"condition": "61.8% < m2 < 100%", "triggers": "Rule_4", "output_structure": [":3", ":c3", ":s5", ":F3"]},
+      {"condition": "100% <= m2 < 161.8%", "triggers": "Rule_5", "output_structure": [":F3", ":c3", "x:c3"]},
+      {"condition": "161.8% <= m2 <= 261.8%", "triggers": "Rule_6", "output_structure": [":F3", ":c3", ":s5"]},
+      {"condition": "m2 > 261.8%", "triggers": "Rule_7", "output_structure": [":F3", ":c3", ":s5", "x:c3"]}
+    ],
+    "trading_action": "이 수학적 계산을 통해 m1이 충격파 부품인지 조정파 부품인지 확정(Position Indicator 할당)하고 Level_1 조립으로 넘어감."
+  },
+  {
+    "pattern_name": "Compaction_Process",
+    "category": "System_Rule_Level_Transition",
+    "essential_price_rules": "조립이 확정된 Polywave 패턴(예: 5-3-5 Zigzag)은 더 큰 차원의 차트를 분석하기 위해 단 하나의 Base Structure(:3 또는 :5)로 압축(Compaction)되어야 함.",
+    "complexity_rating": "단일 Monowave = Level_0. Monowave가 3~5개 결합된 Polywave = Level_1. 내부 파동 하나가 세분화된 Multiwave = Level_2.",
+    "trading_action": "봇의 메모리 과부하를 막기 위한 핵심 로직. 3분봉에서 완성된 패턴을 하나의 ':3' 기호로 압축하여 1시간봉 분석의 단일 부품(Monowave)으로 자동 치환시킬 것."
+  },
+  {
+    "pattern_name": "Complex_Correction_Master",
+    "category": "Level_2_Multiwave_Construction",
+    "essential_price_rules": "두 개 이상의 표준 조정파(Standard Corrections)가 x-wave로 연결되어 시장의 횡보 기간을 기하급수적으로 연장시키는 패턴.",
+    "relational_links": [
+      {"combination": "Zigzag + x-wave + Zigzag", "result": "Double Zigzag", "compacted_structure": ":3"},
+      {"combination": "Flat + x-wave + Triangle", "result": "Double Combination", "compacted_structure": ":3"},
+      {"combination": "Zigzag + x-wave + Flat + x-wave + Triangle", "result": "Triple Combination", "compacted_structure": ":3"}
+    ],
+    "x_wave_rules": "x-wave는 직전 조정파와 구조적(Rule of Alternation)으로 반드시 달라야 함. (예: 앞이 Zigzag면 x-wave는 Flat이나 Triangle 형태를 띰).",
+    "trading_action": "x-wave의 존재가 감지되면 시장의 응축된 에너지가 아직 분출되지 않았음을 의미함. 섣부른 돌파 매매(Breakout Trading)를 금지하고, 최종 패턴의 마지막 파동이 Post-Constructive Rules을 만족할 때까지 관망(WAIT)할 것."
+  }
+]

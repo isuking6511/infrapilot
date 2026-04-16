@@ -12,18 +12,17 @@
 # OS
 .DS_Store
 
-# Claude 
+# Claude
 CLAUDE.md
 
-# Docs
-.docs/
-
-# mcp
+# MCP
 .mcp.json
 
-#opsidian
-.opsidian/
-.blog*
+# Obsidian
+.obsidian/
 
 # Ansible
-inventory/dev.yaml
+iac/ansible/inventory/dev.yaml
+
+#env
+.env

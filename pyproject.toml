@@ -1,3 +1,6 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 [project]
 name = "infrapilot"
 version = "0.1.0"
@@ -13,21 +16,24 @@ dependencies = [
     "pydantic-settings>=2.0",
     "prometheus-client>=0.20",
     "kubernetes>=29.0",
-    "anthropic>=0.25",      # optional
-    "openai>=1.30",         # optional
-    "ccxt>=4.0",            # 거래소 통합
-    "pandas>=2.0",          # 지표 계산
-    "ta>=0.11",             # 기술 지표 라이브러리
-    "jinja2>=3.0",          # 프롬프트 템플릿
-    "rich>=13.0",           # CLI 출력 꾸미기
+    "ccxt>=4.0",
+    "pandas>=2.0",
+    "ta>=0.11",
+    "jinja2>=3.0",
+    "rich>=13.0",
+    "python-dotenv>=1.0",
+    # anthropic, openai 제거 (optional로만)
 ]
 
 [project.optional-dependencies]
 claude = ["anthropic>=0.25"]
 openai = ["openai>=1.30"]
 gemini = ["google-generativeai>=0.5"]
-ollama = []  
-all = ["anthropic", "openai", "google-generativeai"]
+ollama = []
+all = ["anthropic>=0.25", "openai>=1.30", "google-generativeai>=0.5"]
+dev = ["ruff>=0.4", "mypy>=1.10", "pytest>=8.0", "pytest-asyncio>=0.23"]
 
 [project.scripts]
 infrapilot = "infrapilot.cli.main:cli"
+[tool.hatch.build.targets.wheel]
+packages = ["src/infrapilot"]

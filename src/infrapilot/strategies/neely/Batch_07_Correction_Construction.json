@@ -1,0 +1,42 @@
+[
+  {
+    "concept_name": "Retracement_Rule_1",
+    "category": "Chapter_3_Mathematical_Rules",
+    "condition": "m2가 m1의 38.2% 미만으로 되돌릴 때 (m2 < 38.2% of m1)",
+    "structural_implication": "m1은 강력한 추세적 파동일 확률이 높음.",
+    "position_indicators": [":5", ":c3", "x:c3", ":sL3", ":s5"],
+    "trading_action": "봇은 m1을 강력한 충격파(Impulse)의 일부로 가설을 세우고, 이어지는 m3가 m2를 돌파하는지(Breakout) 감시해야 함."
+  },
+  {
+    "concept_name": "Retracement_Rule_2",
+    "category": "Chapter_3_Mathematical_Rules",
+    "condition": "m2가 m1의 38.2% 이상, 61.8% 미만으로 되돌릴 때 (38.2% <= m2 < 61.8%)",
+    "structural_implication": "표준적인 되돌림. m1은 충격파의 일부일 수도, 지그재그(Zigzag)의 a파동일 수도 있음.",
+    "position_indicators": [":5", ":sL3", ":c3", ":s5"],
+    "trading_action": "가장 흔한 케이스이므로, 봇은 성급한 진입을 보류하고 m3의 길이와 소요 시간을 m1과 비교(Rule of Proportion)하는 추가 연산에 들어가야 함."
+  },
+  {
+    "concept_name": "Retracement_Rule_3_and_4",
+    "category": "Chapter_3_Mathematical_Rules",
+    "condition": "m2가 m1의 61.8% 이상, 100% 미만으로 되돌릴 때 (61.8% <= m2 < 100%)",
+    "structural_implication": "깊은 되돌림. m1은 플랫(Flat) 조정파의 a파동이거나, 충격파의 1파동 또는 5파동의 끝일 수 있음.",
+    "position_indicators": [":3", ":c3", ":s5", ":F3"],
+    "trading_action": "비방향성 움직임(Non-Directional)의 시작을 암시함. 봇은 시장이 횡보 구간(Consolidation)에 진입했다고 판단하고 타이트한 박스권 매매 로직으로 전환할 것."
+  },
+  {
+    "concept_name": "Retracement_Rule_5_and_6",
+    "category": "Chapter_3_Mathematical_Rules",
+    "condition": "m2가 m1의 100% 이상, 161.8% 미만으로 되돌릴 때 (100% <= m2 < 161.8%)",
+    "structural_implication": "불규칙 조정(Irregular Correction)의 b파동이거나, 이전 추세가 완전히 반전되었음을 의미함.",
+    "position_indicators": [":F3", ":c3", "x:c3"],
+    "trading_action": "m1의 시작점을 완전히 깼으므로, 기존 추세 팔로잉 로직을 즉각 폐기(Stop-Loss)하고 불규칙 플랫(Irregular Flat) 시나리오를 로드할 것."
+  },
+  {
+    "concept_name": "Retracement_Rule_7",
+    "category": "Chapter_3_Mathematical_Rules",
+    "condition": "m2가 m1의 161.8% 이상, 261.8% 이하로 되돌릴 때 (161.8% <= m2 <= 261.8%)",
+    "structural_implication": "m2 자체가 강력한 3파동(충격파)이거나 c파동(지그재그)의 분출임.",
+    "position_indicators": [":F3", ":c3", ":s5"],
+    "trading_action": "봇은 m2 방향으로의 강력한 모멘텀을 인식하고, m2에 대한 짧은 되돌림(m3) 발생 시 즉각적으로 m2 방향으로 추격 매수/매도(Breakout Entry)를 실행해야 함."
+  }
+]

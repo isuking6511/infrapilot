@@ -1,0 +1,25 @@
+[
+  {
+    "concept_name": "Structure_Labels_Base",
+    "category": "Chapter_4_Structure_Labels",
+    "label_3": "조정파(Correction)의 기본 단위. 시장의 모멘텀이 약하거나 추세에 역행할 때 나타나는 구조.",
+    "label_5": "충격파(Impulse)의 기본 단위. 시장의 강력한 추세를 형성하는 구조.",
+    "trading_action": "이전 단계(Retracement Rules)에서 도출된 결과를 바탕으로, 봇은 차트의 각 Monowave에 ':3' 또는 ':5'라는 기본 구조 기호를 1차적으로 매핑해야 함."
+  },
+  {
+    "concept_name": "Position_Indicator_Modifiers",
+    "category": "Chapter_4_Structure_Labels",
+    "modifier_c": "Central (중심부). ':c3'는 패턴의 중간에 위치하여 양옆의 파동을 연결하는 역할 (예: 지그재그의 B파동).",
+    "modifier_F": "Flat (플랫). ':F3'는 플랫(Flat) 조정파의 시작점이거나 불규칙 조정의 일부가 될 수 있음을 암시.",
+    "modifier_s": "Standard (표준). ':s5'는 일반적인 충격파의 1파동, 3파동, 5파동 등에 해당함을 의미.",
+    "modifier_L": "Limiting (제한적). ':sL3'는 삼각형(Triangle)의 마지막 파동처럼 시장의 움직임이 곧 극도로 제한(수렴)될 것임을 경고함.",
+    "trading_action": "이러한 수식어(Modifiers)가 붙은 기호가 발견되면, 봇은 향후 발생할 파동의 시나리오를 2~3개로 대폭 압축하여 연산 효율을 극대화해야 함."
+  },
+  {
+    "concept_name": "Rule_of_Alternation",
+    "category": "Core_Principles",
+    "essential_rules": "동일한 등급(Degree) 내에 있는 인접한 파동들은 가격(Price), 시간(Time), 내부 구조(Complexity) 중 최소 하나 이상에서 반드시 다르게 나타나야 함 (교대의 법칙).",
+    "application_impulse": "하나의 충격파(:5) 내부에서 2파동과 4파동은 결코 같은 형태일 수 없음. (예: 2파가 단순 지그재그였다면, 4파는 복잡한 플랫이나 삼각형으로 교대됨).",
+    "trading_action": "봇은 2파동의 형태와 소요 시간을 메모리에 저장해 두어야 함. 이후 4파동 진입 시, 2파동과 완전히 동일한 형태가 반복된다면 해당 파동을 '완성된 4파'로 인정하지 않고 속임수(Fakeout)로 간주하여 진입을 보류(WAIT)할 것."
+  }
+]

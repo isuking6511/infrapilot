@@ -1,0 +1,64 @@
+{
+  "module": "Batch_09_Promotion_and_Compaction",
+  "topic": "Promotion_and_Compaction",
+  "description": "패턴이 검증된 후 진행 기호를 부여하고 단일 구조로 압축하는 절차",
+  "Progress_Labels_Promotion": {
+    "Impulsion": "구조가 충격파 필수 규칙을 통과한 경우 순서대로 1, 2, 3, 4, 5 기호를 할당함",
+    "Correction": "구조가 조정파 규칙에 부합할 경우 순서대로 a, b, c (또는 d, e) 기호를 할당함"
+  },
+  "Compaction_Procedures": {
+    "description": "완성된 엘리엇 패턴의 내부 구조 기호는 압축 후 그 기능을 상실하며 패턴 전체가 단일 구조 기호로 요약됨",
+    "Reduction_Mapping": [
+      {
+        "Pattern": "Trending Impulse",
+        "Series": "5-3-5-3-5",
+        "Base_Structure": ":5"
+      },
+      {
+        "Pattern": "Zigzag",
+        "Series": "5-3-5",
+        "Base_Structure": ":3"
+      },
+      {
+        "Pattern": "Flat",
+        "Series": "3-3-5",
+        "Base_Structure": ":3"
+      },
+      {
+        "Pattern": "Triangle",
+        "Series": "3-3-3-3-3",
+        "Base_Structure": ":3"
+      },
+      {
+        "Pattern": "Terminal Impulse",
+        "Series": "3-3-3-3-3",
+        "Base_Structure": ":5"
+      },
+      {
+        "Pattern": "Complex Correction",
+        "Series": "Contains x-waves",
+        "Base_Structure": ":3"
+      }
+    ]
+  },
+  "Complexity_Rule": {
+    "description": "하위 분할에 따른 복잡성 등급을 설정하여 동급 패턴 간에만 결합하도록 제한하는 규칙",
+    "Levels": [
+      {
+        "Level": 0,
+        "Type": "Monowave",
+        "Definition": "단일 파동"
+      },
+      {
+        "Level": 1,
+        "Type": "Polywave",
+        "Definition": "3개 또는 5개의 모노웨이브로 구성"
+      },
+      {
+        "Level": 2,
+        "Type": "Multiwave",
+        "Definition": "적어도 하나의 충격파 세그먼트가 폴리웨이브로 자체 분할될 때"
+      }
+    ]
+  }
+}

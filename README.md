@@ -21,3 +21,4 @@ AI Multi-Agent Trading & Self-Healing Infrastructure 프로젝트 문서.
 4. ⬜ Phase 4: Monitoring (Prometheus + Grafana)
 5. ⬜ Phase 5: CI/CD + PyPI 배포
 6. ⬜ Phase 6: Docs & 오픈소스 릴리즈
+

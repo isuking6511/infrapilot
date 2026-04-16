@@ -1,0 +1,34 @@
+[
+  {
+    "pattern_name": "Zigzag_General",
+    "category": "Correction (5-3-5)",
+    "essential_price_rules": "Wave-b must retrace less than 61.8% of wave-a. Wave-c must move beyond the end of wave-a.",
+    "retracement_rule": "Zigzags are sharp corrections that usually retrace a significant portion of the previous impulse.",
+    "trading_action": "Wait for the 5-3-5 structure to complete. The end of wave-c offers a high-probability entry in the direction of the main trend."
+  },
+  {
+    "pattern_name": "Zigzag_Truncated",
+    "category": "Correction (5-3-5)",
+    "essential_price_rules": "Wave-c is extremely short, failing to move beyond the end of wave-a. Usually wave-c is 38.2% to 61.8% of wave-a.",
+    "trading_action": "A truncated c-wave indicates extreme market exhaustion and powerful underlying momentum in the opposite direction. Prepare for a violent reversal."
+  },
+  {
+    "pattern_name": "Zigzag_Elongated",
+    "category": "Correction (5-3-5)",
+    "essential_price_rules": "Wave-c is more than 161.8% of wave-a. Whenever a c-wave is more than 161.8% of an a-wave, the probabilities greatly favor the assumed a-b-c is actually the 1-2-3 of a five segment Impulse pattern.",
+    "retracement_rule": "After an Elongated Zigzag, the market should reverse and retrace more than 61.8% of the c-wave before the end of wave-c is violated.",
+    "trading_action": "Do not blindly assume an impulse. Wait for the 61.8% retracement of wave-c to confirm it was actually an Elongated Zigzag before taking action."
+  },
+  {
+    "pattern_name": "Complex_Correction_Small_X",
+    "category": "Non-Standard Correction",
+    "essential_price_rules": "Two or three standard corrections separated by an x-wave. The x-wave retraces less than 61.8% of the previous standard correction.",
+    "trading_action": "This pattern prolongs the consolidation phase. Do not trade breakouts until the final standard correction (e.g., the second or third zigzag/flat) completes."
+  },
+  {
+    "pattern_name": "Complex_Correction_Large_X",
+    "category": "Non-Standard Correction",
+    "essential_price_rules": "Two or three standard corrections separated by an x-wave. The x-wave retraces more than 161.8% (or at least >100%) of the previous standard correction, causing expanding price action.",
+    "trading_action": "The market is exhibiting expanding volatility. It is extremely difficult to trade. Wait for a clear thrust indicating the end of the entire complex formation."
+  }
+]
