@@ -1,0 +1,5 @@
+# 거래소 API 연결 및 데이터 수집
+ccxt>=4.5.0
+
+# PostgreSQL 연동 (Postgres 15 버전 이상 지원)
+psycopg2-binary==2.9.9

@@ -21,3 +21,7 @@ output "db_name" {
   value = module.rds.db_name
   description = "RDS 데이터베이스 이름"
 }
+output "ecr_repository_url" {
+  value = module.ecr.repository_url
+  description = "ecr repository url"
+}

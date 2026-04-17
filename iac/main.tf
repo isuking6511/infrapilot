@@ -33,3 +33,6 @@ module "compute" {
     key_name = var.key_name
   
 }
+module "ecr" {
+    source = "./modules/ecr"
+}
