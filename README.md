@@ -12,7 +12,7 @@ AI Multi-Agent Trading & Self-Healing Infrastructure 프로젝트 문서.
 ## 🏷️ Phase 로드맵
 
 1. ✅ Phase 1: Terraform VPC & Network (완료)
-2. ✅ Phase 2: Ansible & K3s Setup (진행 중)
+2. ✅ Phase 2: Ansible & K3s Setup (완료)
 3. 🔄 Phase 3: Python AI Agent Team
 4. ⬜ Phase 4: Monitoring (Prometheus + Grafana)
 5. ⬜ Phase 5: CI/CD + PyPI 배포
