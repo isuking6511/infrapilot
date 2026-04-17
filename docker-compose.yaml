@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: infrapilot-postgres
+    environment:
+      POSTGRES_DB: infrapilot-db
+      POSTGRES_USER: infrapilot
+      POSTGRES_PASSWORD: ${DB_PASSWORD}  # .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # 데이터 유지
+
+volumes:
+  postgres_data:
