@@ -12,3 +12,12 @@ output "ssh_command" {
   value       = "ssh -i ~/.ssh/${var.key_name}.pem ubuntu@${module.compute.ec2_public_ip}"
   description = "description for ssh command"
 }
+output "db_endpoint" {
+  value       = module.rds.db_endpoint
+  description = "RDS 접속 엔드포인트"
+}
+
+output "db_name" {
+  value = module.rds.db_name
+  description = "RDS 데이터베이스 이름"
+}

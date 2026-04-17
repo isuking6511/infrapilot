@@ -12,10 +12,24 @@ output "public_subnet2_id" {
   value       = aws_subnet.public_subnet2.id
   description = "ID of the second public subnet."
 }
+output "private_subnet1_id" {
+  value       = aws_subnet.private_subnet1.id
+  description = "ID of the first private subnet."
+}
+
+output "private_subnet2_id" {
+  value       = aws_subnet.private_subnet2.id
+  description = "ID of the second private subnet."
+}
 
 output "public_subnet_ids" {
   value       = [aws_subnet.public_subnet1.id, aws_subnet.public_subnet2.id]
   description = "IDs of all public subnets."
+}
+
+output "private_subnet_ids" {
+  value       = [aws_subnet.private_subnet1.id, aws_subnet.private_subnet2.id]
+  description = "IDs of all private subnets."
 }
 
 output "igw_id" {

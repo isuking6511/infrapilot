@@ -7,7 +7,7 @@ resource "aws_vpc" "pilot_vpc" {
     Name = "pilot_vpc"
   }
 }
-#subnet1
+#public subnet1
 resource "aws_subnet" "public_subnet1" {
   vpc_id = aws_vpc.pilot_vpc.id
   cidr_block = var.subnet1_cidr
@@ -18,7 +18,7 @@ resource "aws_subnet" "public_subnet1" {
     Name = "public_subnet1"
   }
 }
-#subnet2
+#public subnet2
 resource "aws_subnet" "public_subnet2" {
   vpc_id = aws_vpc.pilot_vpc.id
   cidr_block = var.subnet2_cidr
@@ -27,6 +27,28 @@ resource "aws_subnet" "public_subnet2" {
 
   tags = {
     Name = "public_subnet2"
+  }
+}
+#private subnet1
+resource "aws_subnet" "private_subnet1" {
+  vpc_id = aws_vpc.pilot_vpc.id
+  cidr_block = var.subnet3_cidr
+ 
+  availability_zone = var.az_a
+
+  tags = {
+    Name = "private_subnet1"
+  }
+}
+#private subnet2
+resource "aws_subnet" "private_subnet2" {
+  vpc_id = aws_vpc.pilot_vpc.id
+  cidr_block = var.subnet4_cidr
+ 
+  availability_zone = var.az_b
+
+  tags = {
+    Name = "private_subnet2"
   }
 }
 #igw
