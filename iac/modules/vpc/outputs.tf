@@ -41,3 +41,8 @@ output "public_route_table_id" {
   value       = aws_route_table.pilot_public_rt.id
   description = "ID of the public route table."
 }
+
+output "private_route_table_id" {
+  value       = aws_route_table.pilot_private_rt.id
+  description = "ID of the private route table."
+}

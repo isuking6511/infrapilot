@@ -15,6 +15,12 @@ module "security" {
   vpc_id = module.vpc.vpc_id
 }
 
+module "nat_security" {
+  source   = "./modules/nat_security"
+  vpc_id   = module.vpc.vpc_id
+  vpc_cidr = var.vpc_cidr
+}
+
 module "lambda_sg" {
   source = "./modules/lambda_security"
   vpc_id = module.vpc.vpc_id
@@ -24,7 +30,7 @@ module "rds_security" {
   source       = "./modules/rds_security"
   vpc_id       = module.vpc.vpc_id
   ec2_sg_id    = module.security.sg_id
-  lambda_sg_id = module.lambda_sg.sg_id  # lambda_sg 모듈에서 참조
+  lambda_sg_id = module.lambda_sg.sg_id
 }
 
 module "rds" {
@@ -40,10 +46,18 @@ module "ecr" {
 }
 
 module "compute" {
-  source    = "./modules/compute"
-  subnet_id = module.vpc.public_subnet1_id
-  sg_id     = module.security.sg_id
-  key_name  = var.key_name
+  source     = "./modules/compute"
+  subnet_id  = module.vpc.public_subnet1_id
+  sg_id      = module.security.sg_id
+  nat_sg_id  = module.nat_security.sg_id
+  key_name   = var.key_name
+}
+
+# Private subnet → NAT instance 경로 (순환 의존성 방지를 위해 root에서 추가)
+resource "aws_route" "private_nat" {
+  route_table_id         = module.vpc.private_route_table_id
+  destination_cidr_block = "0.0.0.0/0"
+  network_interface_id   = module.compute.nat_instance_eni
 }
 
 module "lambda" {

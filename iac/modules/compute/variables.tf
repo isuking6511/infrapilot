@@ -11,3 +11,6 @@ variable "subnet_id" {
 variable "sg_id" {
     type = string
 }
+variable "nat_sg_id" {
+  type = string
+}
