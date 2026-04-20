@@ -19,6 +19,7 @@ module "nat_security" {
   source   = "./modules/nat_security"
   vpc_id   = module.vpc.vpc_id
   vpc_cidr = var.vpc_cidr
+  my_ip    = var.my_ip
 }
 
 module "lambda_sg" {
@@ -61,11 +62,13 @@ resource "aws_route" "private_nat" {
 }
 
 module "lambda" {
-  source        = "./modules/lambda"
-  vpc_id        = module.vpc.vpc_id
-  subnet_ids    = [module.vpc.private_subnet1_id, module.vpc.private_subnet2_id]
-  ecr_image_uri = "${module.ecr.repository_url}:latest"
-  db_host       = module.rds.db_endpoint
-  db_password   = var.db_password
-  lambda_sg_id  = module.lambda_sg.sg_id
+  source         = "./modules/lambda"
+  vpc_id         = module.vpc.vpc_id
+  subnet_ids     = [module.vpc.private_subnet1_id, module.vpc.private_subnet2_id]
+  ecr_image_uri  = "${module.ecr.repository_url}:latest"
+  db_host        = module.rds.db_endpoint
+  db_password    = var.db_password
+  lambda_sg_id   = module.lambda_sg.sg_id
+  gemini_api_key = var.gemini_api_key
 }
+

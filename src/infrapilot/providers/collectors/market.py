@@ -1,29 +1,49 @@
 """시장 데이터 수집기 — ccxt 기반."""
 
+import time
 import ccxt
 
-exchange = ccxt.bybit()  # API 키 없어도 시세 조회는 됨
+exchange = ccxt.bybit({
+    "timeout": 30000,       # 30초 (기본 10초에서 늘림)
+    "enableRateLimit": True,
+})
 
 
 def fetch_symbols(min_volume: float = 5_000_000) -> list[str]:
     """거래대금 조건에 맞는 심볼 목록."""
-    markets = exchange.fetch_tickers()  # 전체 마켓 조회
-    
+    markets = _fetch_tickers_with_retry()
+
     symbols = []
     for symbol, ticker in markets.items():
         if not (symbol.endswith("/USDT") or symbol.endswith("/USDT:USDT")):
             continue
         if float(ticker.get("quoteVolume") or 0) >= min_volume:
             symbols.append(symbol)
-    
+
     return symbols
+
+
+def fetch_top_symbols(n: int = 50, min_volume: float = 1_000_000) -> list[str]:
+    """거래대금 상위 n개 심볼 (분석용)."""
+    markets = _fetch_tickers_with_retry()
+
+    candidates = []
+    for symbol, ticker in markets.items():
+        if not (symbol.endswith("/USDT") or symbol.endswith("/USDT:USDT")):
+            continue
+        vol = float(ticker.get("quoteVolume") or 0)
+        if vol >= min_volume:
+            candidates.append((symbol, vol))
+
+    candidates.sort(key=lambda x: x[1], reverse=True)
+    return [s for s, _ in candidates[:n]]
 
 
 def fetch_ohlcv(symbol: str, timeframe: str = "15m", limit: int = 200) -> list[dict]:
     """단일 심볼 OHLCV."""
     raw = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
     # raw = [[timestamp, open, high, low, close, volume], ...]
-    
+
     return [
         {
             "timestamp": row[0],
@@ -35,3 +55,16 @@ def fetch_ohlcv(symbol: str, timeframe: str = "15m", limit: int = 200) -> list[d
         }
         for row in raw
     ]
+
+
+def _fetch_tickers_with_retry(max_retries: int = 3) -> dict:
+    """fetch_tickers 재시도 — 지수 백오프."""
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            return exchange.fetch_tickers()
+        except (ccxt.RequestTimeout, ccxt.NetworkError) as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)  # 1s, 2s, 4s
+    raise last_error

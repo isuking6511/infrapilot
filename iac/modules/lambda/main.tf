@@ -66,3 +66,56 @@ resource "aws_lambda_permission" "eventbridge" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.schedule.arn
 }
+
+# ── Analyzer Lambda (15분마다 상위 50개 엘리어트 파동 분석) ──────────────────
+
+resource "aws_lambda_function" "analyzer" {
+  function_name = "infrapilot-analyzer"
+  package_type  = "Image"
+  image_uri     = var.ecr_image_uri
+  role          = aws_iam_role.lambda.arn
+  timeout       = 900  # 50개 심볼 × API 호출 시간 여유
+  memory_size   = 512
+
+  image_config {
+    command = ["infrapilot.lambda_.analyzer.handler"]
+  }
+
+  vpc_config {
+    subnet_ids         = var.subnet_ids
+    security_group_ids = [var.lambda_sg_id]
+  }
+
+  environment {
+    variables = {
+      DB_HOST        = var.db_host
+      DB_PORT        = "5432"
+      DB_NAME        = "infrapilot"
+      DB_USER        = "infrapilot"
+      DB_PASSWORD    = var.db_password
+      GEMINI_API_KEY = var.gemini_api_key
+    }
+  }
+
+  tags = {
+    Name = "infrapilot-analyzer"
+  }
+}
+
+resource "aws_cloudwatch_event_rule" "analyzer_schedule" {
+  name                = "infrapilot-analyzer-schedule"
+  schedule_expression = "rate(15 minutes)"
+}
+
+resource "aws_cloudwatch_event_target" "analyzer" {
+  rule = aws_cloudwatch_event_rule.analyzer_schedule.name
+  arn  = aws_lambda_function.analyzer.arn
+}
+
+resource "aws_lambda_permission" "analyzer_eventbridge" {
+  statement_id  = "AllowEventBridgeAnalyzer"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.analyzer.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.analyzer_schedule.arn
+}

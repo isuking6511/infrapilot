@@ -26,3 +26,9 @@ variable "db_password" {
 variable "lambda_sg_id" {
   type = string
 }
+
+variable "gemini_api_key" {
+  type      = string
+  sensitive = true
+  description = "Google Gemini API 키 (무료 티어)"
+}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>InfraPilot Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .status-impulse           { background: #e8f5e9; }
+    .status-correction_ending { background: #fff9c4; color: #e65100; font-weight: 600; }
+    .status-impulse_ending    { background: #ffebee; color: #b71c1c; font-weight: 600; }
+    .status-unknown           { background: #f5f5f5; color: #aaa; }
+    td small { font-size: 0.75rem; }
+    .conf { color: #888; }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid py-3">
+
+  <div class="d-flex align-items-center mb-3">
+    <h4 class="mb-0 me-3">📈 InfraPilot Dashboard</h4>
+    <small class="text-muted">Elliott Wave · 상위 50개 코인</small>
+  </div>
+
+  <!-- 매수/매도 후보 -->
+  <div class="row g-2 mb-3">
+    <div class="col-md-6">
+      <div class="card border-success h-100">
+        <div class="card-header bg-success text-white py-1">
+          🟢 매수 후보 — 조정 끝나가는 코인 (correction_ending)
+        </div>
+        <div class="card-body py-2">
+          {% for sym in correction_ending %}
+            <a href="/symbol/{{ sym }}" class="badge bg-success text-decoration-none me-1 mb-1">
+              {{ short(sym) }}
+            </a>
+          {% else %}
+            <span class="text-muted small">아직 없음</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-danger h-100">
+        <div class="card-header bg-danger text-white py-1">
+          🔴 매도 후보 — 상승 끝나가는 코인 (impulse_ending)
+        </div>
+        <div class="card-body py-2">
+          {% for sym in impulse_ending %}
+            <a href="/symbol/{{ sym }}" class="badge bg-danger text-decoration-none me-1 mb-1">
+              {{ short(sym) }}
+            </a>
+          {% else %}
+            <span class="text-muted small">아직 없음</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 전체 테이블 -->
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-sm table-bordered table-hover mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th class="ps-2">심볼</th>
+            {% for tf in timeframes %}
+            <th class="text-center">{{ tf }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for symbol, data in symbols_data.items() %}
+          <tr>
+            <td class="ps-2">
+              <a href="/symbol/{{ symbol }}" class="text-decoration-none fw-semibold">
+                {{ short(symbol) }}
+              </a>
+            </td>
+            {% for tf in timeframes %}
+              {% set a = data.get(tf, {}) %}
+              {% set st = a.get('status', '') %}
+              <td class="text-center status-{{ st if st else 'unknown' }}">
+                {% if a %}
+                  <small>{{ st | replace('_', ' ') }}<br>
+                  <span class="conf">{{ a.get('confidence', '?') }}%</span></small>
+                {% else %}
+                  <small class="text-muted">—</small>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+          {% if not symbols_data %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-3">
+              아직 분석 데이터가 없습니다. 첫 번째 Lambda 실행을 기다려주세요.
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
