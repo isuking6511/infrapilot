@@ -1,0 +1,35 @@
+=== GRID RUN ===
+  symbols=['BTC/USDT']  TFs=['4h', '1h']
+  entry_modes=['reversion']  neely=['off', 'on']  vol=['off', 'on']
+  minPlanScore=[3.0, 4.0]  weight_presets=['default']
+  total runs: 16
+  [1/16] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.28R(n=82)  OOS=+0.17R(n=35)  OOS_PF=1.27
+  [2/16] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.29R(n=39)  OOS=-0.11R(n=21)  OOS_PF=0.85
+  [3/16] BTCUSDT_4h_reversion_neely-off_vol-on_mps3.0_default  IS=-0.28R(n=82)  OOS=+0.17R(n=35)  OOS_PF=1.27
+  [4/16] BTCUSDT_4h_reversion_neely-off_vol-on_mps4.0_default  IS=-0.29R(n=39)  OOS=-0.11R(n=21)  OOS_PF=0.85
+  [5/16] BTCUSDT_4h_reversion_neely-on_vol-off_mps3.0_default  IS=-0.14R(n=24)  OOS=+0.16R(n=9)  OOS_PF=1.27
+  [6/16] ⚠️ BTCUSDT_4h_reversion_neely-on_vol-off_mps4.0_default  IS=+0.23R(n=11)  OOS=-0.58R(n=5)  OOS_PF=0.30
+  [7/16] BTCUSDT_4h_reversion_neely-on_vol-on_mps3.0_default  IS=-0.14R(n=24)  OOS=+0.16R(n=9)  OOS_PF=1.27
+  [8/16] ⚠️ BTCUSDT_4h_reversion_neely-on_vol-on_mps4.0_default  IS=+0.23R(n=11)  OOS=-0.58R(n=5)  OOS_PF=0.30
+  [9/16] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.17R(n=445)  OOS=+0.08R(n=183)  OOS_PF=1.11
+  [10/16] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.13R(n=255)  OOS=+0.11R(n=100)  OOS_PF=1.16
+  [11/16] BTCUSDT_1h_reversion_neely-off_vol-on_mps3.0_default  IS=-0.17R(n=445)  OOS=+0.08R(n=183)  OOS_PF=1.11
+  [12/16] BTCUSDT_1h_reversion_neely-off_vol-on_mps4.0_default  IS=-0.13R(n=255)  OOS=+0.11R(n=100)  OOS_PF=1.16
+  [13/16] BTCUSDT_1h_reversion_neely-on_vol-off_mps3.0_default  IS=-0.16R(n=127)  OOS=+0.14R(n=52)  OOS_PF=1.20
+  [14/16] BTCUSDT_1h_reversion_neely-on_vol-off_mps4.0_default  IS=-0.11R(n=71)  OOS=-0.08R(n=25)  OOS_PF=0.89
+  [15/16] BTCUSDT_1h_reversion_neely-on_vol-on_mps3.0_default  IS=-0.16R(n=127)  OOS=+0.14R(n=52)  OOS_PF=1.20
+  [16/16] BTCUSDT_1h_reversion_neely-on_vol-on_mps4.0_default  IS=-0.11R(n=71)  OOS=-0.08R(n=25)  OOS_PF=0.89
+
+=== TOP 10 OOS LEADERBOARD ===
+                                               run_id  OOS_n_trades  OOS_win_rate  OOS_profit_factor  OOS_expectancy_r  OOS_total_r  OOS_max_dd_pct  IS_expectancy_r  overfit_flag
+BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default            35        0.4000              1.266            0.1699        5.945          1.1405          -0.2763         False
+ BTCUSDT_4h_reversion_neely-off_vol-on_mps3.0_default            35        0.4000              1.266            0.1699        5.945          1.1405          -0.2763         False
+ BTCUSDT_1h_reversion_neely-on_vol-off_mps3.0_default            52        0.3846              1.200            0.1413        7.350          3.5867          -0.1602         False
+  BTCUSDT_1h_reversion_neely-on_vol-on_mps3.0_default            52        0.3846              1.200            0.1413        7.350          3.5867          -0.1602         False
+BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           100        0.4000              1.161            0.1095       10.951          0.4871          -0.1329         False
+ BTCUSDT_1h_reversion_neely-off_vol-on_mps4.0_default           100        0.4000              1.161            0.1095       10.951          0.4871          -0.1329         False
+BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default           183        0.3770              1.107            0.0786       14.390          4.1169          -0.1690         False
+ BTCUSDT_1h_reversion_neely-off_vol-on_mps3.0_default           183        0.3770              1.107            0.0786       14.390          4.1169          -0.1690         False
+
+  full leaderboard → /Users/gimjiho/Desktop/test/wcse_backtest/reports/leaderboard.csv
+EXITCODE=0

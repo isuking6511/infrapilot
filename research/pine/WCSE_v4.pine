@@ -1,0 +1,1093 @@
+//@version=6
+// ============================================================================
+//  WCSE v4 — Wave-Confluence Structural Engine (Neely NEoWave x ICT)  [SWING]
+//  v4 변경점 (PDF·xlsx·스크린샷 7장 대조 후 보완)
+//   [Neely MEW 3장 원전 정합]
+//    1) Rule 5~7 Condition을 원전대로 분리 (a<100% · b<161.8% · c≤261.8% · d)
+//    2) Category(m3÷m2)는 Rule 4 전용으로 한정
+//   [ICT Advanced Market Structure xlsx 정합]
+//    3) LTH/LTL 3계층 구조 (양옆에 더 낮은 ITH를 가진 ITH = LTH)
+//    4) 리밸런스 ITH/ITL — FVG 충전 시 형성된 극점을 구조 레벨로 등록,
+//       바이어스 무효화 기준으로 사용 (깨지면 분석 오류 → 물러서기)
+//    5) 무효화 후 재진입 금지 쿨다운 ("don't force the trade again")
+//    6) 표준편차(SD) 목표 투영 — ITL/ITH 이탈 시 직전 스윙의 -1/-2/-2.5 SD
+//    7) 오더블록 — BOS 직전 마지막 반대색 캔들 레벨을 합류 근거에 추가
+//   [스크린샷 기법 정합]
+//    8) ATH 부채살(fan) 추세선 다발 — ATH→이후 구조 피벗 N개 관통
+//    9) 피치포크 다중 밴드 — 내부 0.5선 + 외부 1.5/2.0 경고선 (무지개 채널)
+//   10) 셋업 점수 실시간 표시 — "점수 X / 필요 Y" (WACP Score/Required 방식)
+// ============================================================================
+indicator("WCSE v4 — Swing/Breakout Engine (Neely x ICT x LW x Turtle)", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
+
+// ───────────── INPUTS ─────────────
+gS = "① 구조 / 파동 (전 구간)"
+swLen      = input.int(8,  "스윙 감도(피벗 길이)", group=gS, minval=2, tooltip="15m:5~8 · 1h:6~10 · 4h/1D:8~13 · 1W:5~8")
+minLegATR  = input.float(1.5, "유의미 스윙 최소크기(ATR배수)", group=gS, minval=0.2)
+maxLegATR  = input.float(0.0, "최대 스윙크기(ATR배수, 0=끔)", group=gS, minval=0.0)
+maxPiv     = input.int(80, "추적 피벗 수", group=gS, minval=20, maxval=120)
+lookback   = input.int(400, "분석 구간(최근 N봉)", group=gS, minval=80, maxval=5000)
+showZZ     = input.bool(true, "구조 ZigZag", group=gS)
+showStruct = input.bool(true, "ITH/ITL 라벨", group=gS)
+showLT     = input.bool(true, "LTH/LTL 라벨 (장기 구조)", group=gS, tooltip="양옆에 더 낮은 ITH를 가진 ITH = LTH (ICT 3계층)")
+showBOS    = input.bool(true, "BOS / CHoCH (구조 전환)", group=gS)
+showWave   = input.bool(true, "파동 카운트 (검증된 5파/ABC)", group=gS)
+
+gH = "② 상위TF 바이어스 (Top-Down)"
+biasTF     = input.timeframe("240", "상위TF", group=gH)
+htfLen     = input.int(50, "상위TF EMA", group=gH, minval=5)
+reqAlign   = input.bool(true, "상위TF 바이어스와 정렬될 때만 플랜 생성", group=gH)
+
+gF = "③ 피보 (지배 스윙 앵커, 개방형 풀세트)"
+showFib    = input.bool(true, "되돌림(진입대) + 확장(목표) 피보", group=gF)
+extStr     = input.string("0.236,0.382,0.5,0.618,0.786,1.0,1.13,1.272,1.414,1.618,1.886,2.618", "확장 사다리 배수", group=gF)
+dualFib    = input.bool(true, "확장 피보 2개 겹치기(합류 강화)", group=gF)
+
+gD = "④ 빗각 · 팬 · 피치포크 · 넥라인 · 합류"
+showDiag   = input.bool(true, "장기 추세선 (가까운 것만)", group=gD)
+fanN       = input.int(4, "ATH 부채살 선 수 (0=끔)", group=gD, minval=0, maxval=6, tooltip="ATH→이후 구조 피벗 N개를 관통하는 부채살 (스크린샷 검은 선 다발)")
+colFan     = input.color(#37474f, "부채살 색", group=gD)
+nearBandATR= input.float(8.0, "가까움 기준(ATR배수)", group=gD, minval=1)
+showFar    = input.bool(true, "상·하단 극단선 1개씩만 열기", group=gD)
+showFork   = input.bool(true, "피치포크 (역사적 고점 앵커)", group=gD)
+forkBands  = input.bool(true, "피치포크 밴드 (0.5 내부선 + 1.5/2.0 경고선)", group=gD, tooltip="스크린샷의 무지개 채널 방식")
+showNeck   = input.bool(true, "넥라인(돌파된 구조 레벨 역할전환)", group=gD)
+diagExt    = input.int(50, "연장 바 수", group=gD, minval=5)
+showWick   = input.bool(true, "긴 꼬리 시·종가 레벨", group=gD)
+wickRatio  = input.float(0.55, "꼬리/전체 임계", group=gD, minval=0.1, maxval=0.9)
+showFVG    = input.bool(true, "FVG/임밸런스", group=gD)
+consume    = input.bool(true, "닿은 수평 레벨 소멸(빗각 면제)", group=gD)
+showConf   = input.bool(true, "합류 클러스터 점수", group=gD)
+confTolA   = input.float(0.5, "합류 허용폭(ATR배수)", group=gD, minval=0.05)
+minConf    = input.int(2, "최소 근거 수", group=gD, minval=2)
+
+gI = "⑤ ICT 고급구조 (리밸런스 · OB · SD목표 · 쿨다운)"
+showReb    = input.bool(true, "리밸런스 ITH/ITL (FVG 충전 극점)", group=gI, tooltip="임밸런스를 충전하며 형성된 고/저점 = ITH/ITL. 바이어스 방향과 반대로 깨지면 셋업 무효+쿨다운")
+showOB     = input.bool(true, "오더블록 (BOS 직전 마지막 반대캔들)", group=gI)
+showSD     = input.bool(true, "표준편차 목표 (-1/-2/-2.5 SD)", group=gI, tooltip="ITL/ITH 이탈 시 직전 되돌림 스윙으로 투영 (ICT 표준편차 목표법)")
+cooldownBars = input.int(20, "무효화 후 같은방향 재진입 금지(봉)", group=gI, minval=0)
+
+gP = "⑥ 매매 플랜 (OTE 기반)"
+showPlan   = input.bool(true, "진입/손절/익절", group=gP)
+oteLo      = input.float(0.62, "OTE 하단", group=gP, minval=0.5, maxval=0.9)
+oteHi      = input.float(0.79, "OTE 상단", group=gP, minval=0.5, maxval=0.95)
+slBufATR   = input.float(0.5, "손절 버퍼(ATR배수)", group=gP, minval=0)
+rrMin      = input.float(2.0, "최소 RR", group=gP, minval=0.5)
+minPlanScore = input.float(3.0, "진입 최소 합류 점수(근거)", group=gP, minval=1.0)
+maxStopATR = input.float(4.0, "최대 손절폭(ATR배수)", group=gP, minval=1.0)
+planExt    = input.int(40, "플랜 연장 바 수", group=gP, minval=5)
+
+gB = "⑦ 추세돌파 (Larry Williams · Turtle)"
+showBrk    = input.bool(true, "Donchian 돌파 + 레인지확장 신호", group=gB)
+donLen     = input.int(20, "Donchian 길이", group=gB, minval=5)
+rngK       = input.float(1.2, "레인지확장 임계(바폭 ÷ ATR)", group=gB, minval=0.5)
+stopN      = input.float(2.0, "N(ATR) 손절 배수", group=gB, minval=0.5)
+riskPct    = input.float(1.0, "트레이드당 리스크 %", group=gB, minval=0.1)
+acctSize   = input.float(10000, "계좌 크기(사이즈 표시용)", group=gB, minval=1)
+
+gWt = "⑧ 합류 가중치 (당신 우선순위)"
+wFib  = input.float(1.5, "피보", group=gWt, minval=0)
+wDiag = input.float(1.5, "빗각/추세선/부채살", group=gWt, minval=0)
+wFork = input.float(1.0, "피치포크", group=gWt, minval=0)
+wNeck = input.float(0.5, "넥라인", group=gWt, minval=0)
+wWick = input.float(1.0, "꼬리", group=gWt, minval=0)
+wFvg  = input.float(1.0, "FVG", group=gWt, minval=0)
+wDon  = input.float(1.0, "돌파선", group=gWt, minval=0)
+wZone = input.float(1.2, "가격대(이전 스윙 S/R)", group=gWt, minval=0)
+wOB   = input.float(1.2, "오더블록", group=gWt, minval=0)
+wLT   = input.float(1.8, "LTH/LTL · 리밸런스 극점", group=gWt, minval=0)
+
+gST = "⑨ 스타일"
+colHi   = input.color(#ef5350, "고점/저항", group=gST)
+colLo   = input.color(#26a69a, "저점/지지", group=gST)
+colDiag = input.color(#2962ff, "빗각", group=gST)
+colFib  = input.color(#ff9800, "피보", group=gST)
+colConf = input.color(#ab47bc, "합류", group=gST)
+colFork = input.color(#00bcd4, "피치포크", group=gST)
+colNeck = input.color(#ffd600, "넥라인", group=gST)
+
+atr = ta.atr(14)
+volMA = ta.sma(volume, 20)
+volSpike = volume > volMA * 1.3
+tol = atr * confTolA
+inWin = bar_index >= last_bar_index - lookback
+valid(float px) => not na(px) and px > 0
+// src: 1꼬리 2피보 3넥라인 4돌파선 5빗각/부채살 6FVG 7포크 8가격대/LT 9오더블록
+srcTxt(bool fb, bool dg, bool nk, bool bo, bool wk, bool fv, bool pf, bool zn, bool ob) =>
+    (fb ? "피보 " : "") + (dg ? "빗각 " : "") + (pf ? "포크 " : "") + (zn ? "가격대 " : "") + (ob ? "OB " : "") + (nk ? "넥라인 " : "") + (bo ? "돌파선 " : "") + (wk ? "꼬리 " : "") + (fv ? "FVG" : "")
+
+// ───────────── 확장 배수 파싱 ─────────────
+var array<float> extMul = array.new<float>()
+if barstate.isfirst
+    parts = str.split(extStr, ",")
+    if array.size(parts) > 0
+        for i = 0 to array.size(parts) - 1
+            v = str.tonumber(str.replace_all(array.get(parts, i), " ", ""))
+            if not na(v)
+                array.push(extMul, v)
+
+// ───────────── 상위TF 바이어스 ─────────────
+[hC, hE] = request.security(syminfo.tickerid, biasTF, [close[1], ta.ema(close, htfLen)[1]], lookahead=barmerge.lookahead_off)
+htfBull = hC > hE
+htfBear = hC < hE
+
+// ───────────── 드로잉 핸들 ─────────────
+var array<line>  zz       = array.new<line>()
+var array<label> structLb = array.new<label>()
+var array<line>  dynLines = array.new<line>()
+var array<label> dynLabs  = array.new<label>()
+var array<box>   dynBoxes = array.new<box>()
+var array<box>   fvgBoxes = array.new<box>()
+
+capLine(array<line> a, int mx) =>
+    if array.size(a) > mx
+        line.delete(array.shift(a))
+capLab(array<label> a, int mx) =>
+    if array.size(a) > mx
+        label.delete(array.shift(a))
+capBox(array<box> a, int mx) =>
+    if array.size(a) > mx
+        box.delete(array.shift(a))
+
+clearDyn() =>
+    if array.size(dynLines) > 0
+        for i = 0 to array.size(dynLines) - 1
+            line.delete(array.get(dynLines, i))
+    if array.size(dynLabs) > 0
+        for i = 0 to array.size(dynLabs) - 1
+            label.delete(array.get(dynLabs, i))
+    if array.size(dynBoxes) > 0
+        for i = 0 to array.size(dynBoxes) - 1
+            box.delete(array.get(dynBoxes, i))
+    array.clear(dynLines)
+    array.clear(dynLabs)
+    array.clear(dynBoxes)
+
+newL(int x1, float y1, int x2, float y2, color c, int w, string st) =>
+    ln = line.new(x1, y1, x2, y2, xloc=xloc.bar_index, color=c, width=w, style=st)
+    array.push(dynLines, ln)
+    ln
+newLab(int x, float y, string t, color c, string st, color tc) =>
+    lb = label.new(x, y, t, xloc=xloc.bar_index, color=c, style=st, textcolor=tc, size=size.small)
+    array.push(dynLabs, lb)
+    lb
+
+// ───────────── M1. 피벗 추출 (전 캔들) ─────────────
+var array<float> pP = array.new<float>()
+var array<int>   pB = array.new<int>()
+var array<int>   pT = array.new<int>()
+var array<int>   pK = array.new<int>()      // 0=ST, 1=IT, 2=LT
+var array<int>   pTm = array.new<int>()
+
+// 확정 ITH/ITL 이력 (LT 판정용 — ICT 3계층)
+var array<float> ithP_ = array.new<float>()
+var array<int>   ithB_ = array.new<int>()
+var array<float> itlP_ = array.new<float>()
+var array<int>   itlB_ = array.new<int>()
+var array<float> ltLvls = array.new<float>()   // LTH/LTL 가격 (합류 근거)
+
+pushPiv(float pr, int br, int ty, int tm) =>
+    array.push(pP, pr)
+    array.push(pB, br)
+    array.push(pT, ty)
+    array.push(pK, 0)
+    array.push(pTm, tm)
+    if array.size(pP) > maxPiv
+        array.shift(pP)
+        array.shift(pB)
+        array.shift(pT)
+        array.shift(pK)
+        array.shift(pTm)
+
+idxRecent(int ty, int k) =>
+    cnt = 0
+    res = -1
+    n = array.size(pT)
+    if n > 0
+        for i = n - 1 to 0
+            if res == -1 and array.get(pT, i) == ty
+                if cnt == k
+                    res := i
+                cnt += 1
+    res
+
+var float curITH = na
+var float curITL = na
+var int   msDir  = 0
+var float lastConfITH = na    // 가장 최근 확정 ITH 가격 (SD 투영용)
+var float lastConfITL = na
+
+ph = ta.pivothigh(high, swLen, swLen)
+pl = ta.pivotlow(low,  swLen, swLen)
+
+// ITH 확정 + LTH 판정 (ICT: 양옆에 더 낮은 ITH → 가운데 = LTH)
+handleHigh() =>
+    out = float(na)
+    pushPiv(ph, bar_index - swLen, 1, time[swLen])
+    sz = array.size(pP)
+    if showZZ and sz >= 2
+        x1 = array.get(pB, sz - 2)
+        y1 = array.get(pP, sz - 2)
+        ln = line.new(x1, y1, array.get(pB, sz - 1), array.get(pP, sz - 1), xloc=xloc.bar_index, color=color.new(color.gray, 40), width=1)
+        array.push(zz, ln)
+        capLine(zz, 160)
+    ai = idxRecent(1, 2)
+    bi = idxRecent(1, 1)
+    ci = idxRecent(1, 0)
+    if ai >= 0 and bi >= 0 and ci >= 0
+        pa = array.get(pP, ai)
+        pb = array.get(pP, bi)
+        pc = array.get(pP, ci)
+        if pa < pb and pc < pb
+            array.set(pK, bi, 1)
+            out := pb
+            biBar = array.get(pB, bi)
+            if showStruct
+                lb = label.new(biBar, pb, "ITH", xloc=xloc.bar_index, color=color.new(colHi, 0), style=label.style_label_down, textcolor=color.white, size=size.tiny)
+                array.push(structLb, lb)
+                capLab(structLb, 200)
+            // LT 판정: 직전 확정 ITH(중간)가 양옆 ITH보다 높으면 LTH
+            array.push(ithP_, pb)
+            array.push(ithB_, biBar)
+            if array.size(ithP_) > 12
+                array.shift(ithP_)
+                array.shift(ithB_)
+            ni = array.size(ithP_)
+            if showLT and ni >= 3
+                mid = array.get(ithP_, ni - 2)
+                if mid > array.get(ithP_, ni - 3) and mid > array.get(ithP_, ni - 1)
+                    lb2 = label.new(array.get(ithB_, ni - 2), mid, "LTH", xloc=xloc.bar_index, color=color.new(colHi, 0), style=label.style_label_down, textcolor=color.yellow, size=size.small)
+                    array.push(structLb, lb2)
+                    capLab(structLb, 200)
+                    array.push(ltLvls, mid)
+                    if array.size(ltLvls) > 10
+                        array.shift(ltLvls)
+    out
+
+handleLow() =>
+    out = float(na)
+    pushPiv(pl, bar_index - swLen, -1, time[swLen])
+    sz = array.size(pP)
+    if showZZ and sz >= 2
+        x1 = array.get(pB, sz - 2)
+        y1 = array.get(pP, sz - 2)
+        ln = line.new(x1, y1, array.get(pB, sz - 1), array.get(pP, sz - 1), xloc=xloc.bar_index, color=color.new(color.gray, 40), width=1)
+        array.push(zz, ln)
+        capLine(zz, 160)
+    ai = idxRecent(-1, 2)
+    bi = idxRecent(-1, 1)
+    ci = idxRecent(-1, 0)
+    if ai >= 0 and bi >= 0 and ci >= 0
+        pa = array.get(pP, ai)
+        pb = array.get(pP, bi)
+        pc = array.get(pP, ci)
+        if pa > pb and pc > pb
+            array.set(pK, bi, 1)
+            out := pb
+            biBar = array.get(pB, bi)
+            if showStruct
+                lb = label.new(biBar, pb, "ITL", xloc=xloc.bar_index, color=color.new(colLo, 0), style=label.style_label_up, textcolor=color.white, size=size.tiny)
+                array.push(structLb, lb)
+                capLab(structLb, 200)
+            array.push(itlP_, pb)
+            array.push(itlB_, biBar)
+            if array.size(itlP_) > 12
+                array.shift(itlP_)
+                array.shift(itlB_)
+            ni = array.size(itlP_)
+            if showLT and ni >= 3
+                mid = array.get(itlP_, ni - 2)
+                if mid < array.get(itlP_, ni - 3) and mid < array.get(itlP_, ni - 1)
+                    lb2 = label.new(array.get(itlB_, ni - 2), mid, "LTL", xloc=xloc.bar_index, color=color.new(colLo, 0), style=label.style_label_up, textcolor=color.yellow, size=size.small)
+                    array.push(structLb, lb2)
+                    capLab(structLb, 200)
+                    array.push(ltLvls, mid)
+                    if array.size(ltLvls) > 10
+                        array.shift(ltLvls)
+    out
+
+if not na(ph) and inWin
+    vH = handleHigh()
+    if not na(vH)
+        curITH := vH
+        lastConfITH := vH
+if not na(pl) and inWin
+    vL = handleLow()
+    if not na(vL)
+        curITL := vL
+        lastConfITL := vL
+
+// ───────────── 소프트 레벨(꼬리/FVG/OB/SD) + 소멸 ─────────────
+type Lvl
+    float price
+    float wt
+    bool  active
+    int   src
+
+var array<Lvl> levels = array.new<Lvl>()
+addLvl(float pr, float w, int s) =>
+    merged = false
+    if array.size(levels) > 0
+        for i = 0 to array.size(levels) - 1
+            l = array.get(levels, i)
+            if not merged and l.active and math.abs(l.price - pr) < tol * 0.4
+                l.wt := l.wt + w
+                merged := true
+    if not merged
+        array.push(levels, Lvl.new(pr, w, true, s))
+    if array.size(levels) > 200
+        array.shift(levels)
+
+// ───────────── BOS / CHoCH + 넥라인 + OB + SD목표 (히스토리컬) ─────────────
+var float neckline = na
+var int   neckDir  = 0
+var int   trendDir = 0
+var int   trendStartT = na
+
+// 오더블록: BOS 직전 마지막 반대색 캔들 (ICT 기관 오더플로우)
+f_obBear() =>
+    done = false
+    for k = 1 to 12
+        if not done and close[k] > open[k]
+            addLvl(high[k], wOB, 9)
+            done := true
+f_obBull() =>
+    done = false
+    for k = 1 to 12
+        if not done and close[k] < open[k]
+            addLvl(low[k], wOB, 9)
+            done := true
+
+if inWin and not na(curITH) and close > curITH
+    choch = msDir < 0
+    msDir := 1
+    neckline := curITH
+    neckDir := 1
+    if choch
+        trendDir := 1
+        trendStartT := time
+    if showBOS
+        lb = label.new(bar_index, curITH, choch ? "CHoCH▲" : "BOS▲", xloc=xloc.bar_index, color=color.new(colLo, 10), style=label.style_label_up, textcolor=color.white, size=size.tiny)
+        array.push(structLb, lb)
+        capLab(structLb, 200)
+    if showOB
+        f_obBull()
+    // SD 목표: 깨진 ITH 위로 직전 스윙(ITH-ITL)의 1/2/2.5배 투영
+    if showSD and valid(lastConfITL)
+        sw = curITH - lastConfITL
+        if sw > 0
+            addLvl(curITH + 1.0 * sw, wFib * 0.8, 2)
+            addLvl(curITH + 2.0 * sw, wFib * 0.8, 2)
+            addLvl(curITH + 2.5 * sw, wFib * 0.6, 2)
+    curITH := na
+if inWin and not na(curITL) and close < curITL
+    choch = msDir > 0
+    msDir := -1
+    neckline := curITL
+    neckDir := -1
+    if choch
+        trendDir := -1
+        trendStartT := time
+    if showBOS
+        lb = label.new(bar_index, curITL, choch ? "CHoCH▼" : "BOS▼", xloc=xloc.bar_index, color=color.new(colHi, 10), style=label.style_label_down, textcolor=color.white, size=size.tiny)
+        array.push(structLb, lb)
+        capLab(structLb, 200)
+    if showOB
+        f_obBear()
+    if showSD and valid(lastConfITH)
+        sw = lastConfITH - curITL
+        if sw > 0
+            addLvl(curITL - 1.0 * sw, wFib * 0.8, 2)
+            addLvl(curITL - 2.0 * sw, wFib * 0.8, 2)
+            addLvl(curITL - 2.5 * sw, wFib * 0.6, 2)
+    curITL := na
+
+// ───────────── 추세돌파 감지 (LW 변동성돌파 + Turtle Donchian) ─────────────
+donHi = ta.highest(high, donLen)[1]
+donLo = ta.lowest(low, donLen)[1]
+rangeExp = (high - low) > rngK * atr
+var int lastBrk = 0
+brkUp = inWin and showBrk and close > donHi and rangeExp and volSpike
+brkDn = inWin and showBrk and close < donLo and rangeExp and volSpike
+if brkUp and lastBrk <= 0
+    lastBrk := 1
+    lb = label.new(bar_index, low, "▲돌파", xloc=xloc.bar_index, color=color.new(colLo, 0), style=label.style_label_up, textcolor=color.white, size=size.tiny)
+    array.push(structLb, lb)
+    capLab(structLb, 200)
+if brkDn and lastBrk >= 0
+    lastBrk := -1
+    lb = label.new(bar_index, high, "▼돌파", xloc=xloc.bar_index, color=color.new(colHi, 0), style=label.style_label_down, textcolor=color.white, size=size.tiny)
+    array.push(structLb, lb)
+    capLab(structLb, 200)
+
+// ───────────── 매크로 앵커 추적 (ATH/ATL) ─────────────
+var float athP = na
+var int   athB = na
+var int   athT = na
+var float atlP = na
+var int   atlB = na
+var int   atlT = na
+if na(athP) or high > athP
+    athP := high
+    athB := bar_index
+    athT := time
+if na(atlP) or low < atlP
+    atlP := low
+    atlB := bar_index
+    atlT := time
+
+// ───────────── 꼬리 레벨 ─────────────
+rng = high - low
+if inWin and showWick and rng > 0
+    if (high - math.max(open, close)) / rng >= wickRatio
+        addLvl(math.max(open, close), wWick, 1)
+    if (math.min(open, close) - low) / rng >= wickRatio
+        addLvl(math.min(open, close), wWick, 1)
+
+// ───────────── FVG 추적 + 리밸런스 ITH/ITL (ICT xlsx 핵심) ─────────────
+// "임밸런스가 충전되면 그 때 형성된 고/저점 = ITH/ITL. 바이어스 반대로 깨지면 분석 오류."
+type Fvg
+    float top
+    float bot
+    int   dir      // 1 = 상승 FVG(아래 지지), -1 = 하락 FVG(위 저항)
+    bool  filled
+
+var array<Fvg> fvgs = array.new<Fvg>()
+var float rebITH = na     // 리밸런스 ITH (FVG 충전 극점)
+var int   rebIthB = na
+var float rebITL = na
+var int   rebItlB = na
+
+if inWin and showFVG and low > high[2]
+    b = box.new(bar_index[2], low, bar_index, high[2], border_color=na, bgcolor=color.new(colLo, 85))
+    array.push(fvgBoxes, b)
+    capBox(fvgBoxes, 60)
+    addLvl(high[2], wFvg, 6)
+    array.push(fvgs, Fvg.new(low, high[2], 1, false))
+if inWin and showFVG and high < low[2]
+    b = box.new(bar_index[2], low[2], bar_index, high, border_color=na, bgcolor=color.new(colHi, 85))
+    array.push(fvgBoxes, b)
+    capBox(fvgBoxes, 60)
+    addLvl(low[2], wFvg, 6)
+    array.push(fvgs, Fvg.new(low[2], high, -1, false))
+if array.size(fvgs) > 40
+    array.shift(fvgs)
+
+if showReb and inWin and array.size(fvgs) > 0
+    for i = 0 to array.size(fvgs) - 1
+        f = array.get(fvgs, i)
+        if not f.filled
+            if f.dir == -1 and high >= f.bot      // 하락 임밸런스 충전 → 그 고점 = 리밸런스 ITH
+                f.filled := true
+                rebITH := high
+                rebIthB := bar_index
+                addLvl(high, wLT, 8)
+                lb = label.new(bar_index, high, "rITH", xloc=xloc.bar_index, color=color.new(colHi, 30), style=label.style_label_down, textcolor=color.yellow, size=size.tiny)
+                array.push(structLb, lb)
+                capLab(structLb, 200)
+            if f.dir == 1 and low <= f.top        // 상승 임밸런스 충전 → 그 저점 = 리밸런스 ITL
+                f.filled := true
+                rebITL := low
+                rebItlB := bar_index
+                addLvl(low, wLT, 8)
+                lb = label.new(bar_index, low, "rITL", xloc=xloc.bar_index, color=color.new(colLo, 30), style=label.style_label_up, textcolor=color.yellow, size=size.tiny)
+                array.push(structLb, lb)
+                capLab(structLb, 200)
+
+if consume and array.size(levels) > 0
+    for i = 0 to array.size(levels) - 1
+        l = array.get(levels, i)
+        if l.active and high >= l.price and low <= l.price
+            l.active := false
+
+// ───────────── 마지막 바: 피보/빗각/합류/플랜 ─────────────
+f_lastIT(int ty) =>
+    res = float(na)
+    rb = int(na)
+    rt = int(na)
+    found = false
+    n = array.size(pP)
+    if n > 0
+        for i = n - 1 to 0
+            if not found and array.get(pT, i) == ty and array.get(pK, i) >= 1
+                res := array.get(pP, i)
+                rb := array.get(pB, i)
+                rt := array.get(pTm, i)
+                found := true
+    [res, rb, rt]
+
+[lastITH, ithBar, ithT] = f_lastIT(1)
+[lastITL, itlBar, itlT] = f_lastIT(-1)
+
+barMs = timeframe.in_seconds(timeframe.period) * 1000
+newLT(int t1, float y1, int t2, float y2, color c, int w, string st) =>
+    ln = line.new(t1, y1, t2, y2, xloc=xloc.bar_time, color=c, width=w, style=st)
+    array.push(dynLines, ln)
+    ln
+
+f_contain(int a0t, float a0p, int ty, float buf) =>
+    n = array.size(pP)
+    bt = int(na)
+    bp = float(na)
+    found = false
+    if n > 0
+        for i = n - 1 to 0
+            if not found and array.get(pT, i) == ty and array.get(pTm, i) > a0t
+                hp = array.get(pP, i)
+                ht = array.get(pTm, i)
+                sl = (hp - a0p) / math.max(1, ht - a0t)
+                ok = true
+                for j = 0 to n - 1
+                    if array.get(pT, j) == ty and array.get(pTm, j) > a0t
+                        lv = a0p + sl * (array.get(pTm, j) - a0t)
+                        if ty == 1 and array.get(pP, j) > lv + buf
+                            ok := false
+                        if ty == -1 and array.get(pP, j) < lv - buf
+                            ok := false
+                if ok
+                    bt := ht
+                    bp := hp
+                    found := true
+    [bt, bp]
+
+f_firstAfter(int ty, int afterT) =>
+    n = array.size(pP)
+    rt = int(na)
+    rp = float(na)
+    found = false
+    if n > 0
+        for i = 0 to n - 1
+            if not found and array.get(pT, i) == ty and array.get(pK, i) >= 1 and array.get(pTm, i) > afterT
+                rt := array.get(pTm, i)
+                rp := array.get(pP, i)
+                found := true
+    [rt, rp]
+
+// 고정(sticky) 셋업 상태 + 쿨다운 (ICT: 무효화 후 재진입 금지)
+var int    aDir = 0
+var float  aEntry = na
+var float  aSL = na
+var float  aTP = na
+var float  aRR = na
+var string aTxt = ""
+var int    aCnt = 0
+var int    standUntil = -1     // 이 봉까지 같은 방향 재진입 금지
+var int    lastInvDir = 0
+var float  gBest = 0.0         // 현재 바이어스 측 최고 합류 점수 (패널 표시)
+
+// ───────────── Neely 리트레이스먼트 규칙 (MEW 3장 원전 정합판) ─────────────
+// Rule: m2÷m1 / Condition: m0÷m1 (Rule 1 · Rules 2-3 · Rule 4 · Rules 5-7 각각 별도 스킴)
+// Category: m3÷m2 — ★Rule 4 전용★
+f_neely() =>
+    n = array.size(pP)
+    rule = 0
+    cond = ""
+    cat = ""
+    dirT = "—"
+    lean = "—"
+    if n >= 4
+        p3 = array.get(pP, n - 4)
+        p2 = array.get(pP, n - 3)
+        p1 = array.get(pP, n - 2)
+        p0 = array.get(pP, n - 1)
+        m0 = math.abs(p2 - p3)
+        m1 = math.abs(p1 - p2)
+        m2 = math.abs(p0 - p1)
+        m3 = math.abs(close - p0)
+        if m1 > 0
+            r2 = m2 / m1
+            r0 = m0 / m1
+            r3 = m2 > 0 ? m3 / m2 : 0.0
+            rule := r2 < 0.382 ? 1 : r2 < 0.615 ? 2 : r2 <= 0.621 ? 3 : r2 < 1.0 ? 4 : r2 < 1.618 ? 5 : r2 <= 2.618 ? 6 : 7
+            dirT := r2 <= 0.618 ? "방향성(추세)" : "비방향성(조정)"
+            lean := rule <= 2 ? "임펄스 우세 → 추세 지속" : rule == 3 ? "경계(애매) → 관망" : rule == 4 ? "조정 우세 → 되돌림" : "100%+ 되돌림 → 직전 파동 무효, 재라벨"
+            // Condition — 원전 4종 스킴
+            if rule == 1
+                cond := r0 < 0.618 ? "a" : r0 < 1.0 ? "b" : r0 <= 1.618 ? "c" : "d"
+            else if rule == 2 or rule == 3
+                cond := r0 < 0.382 ? "a" : r0 < 0.618 ? "b" : r0 < 1.0 ? "c" : r0 <= 1.618 ? "d" : rule == 2 ? "e" : (r0 <= 2.618 ? "e" : "f")
+            else if rule == 4
+                cond := r0 < 0.382 ? "a" : r0 < 1.0 ? "b" : r0 < 1.618 ? "c" : r0 <= 2.618 ? "d" : "e"
+            else  // Rules 5, 6, 7 공용 스킴 (a<100% · b<161.8% · c≤261.8% · d>261.8%)
+                cond := r0 < 1.0 ? "a" : r0 < 1.618 ? "b" : r0 <= 2.618 ? "c" : "d"
+            // Category — Rule 4 전용
+            if rule == 4
+                cat := r3 < 1.0 ? "" : r3 < 1.618 ? "i" : r3 <= 2.618 ? "ii" : "iii"
+    [rule, cond, cat, dirT, lean]
+
+if barstate.islast
+    clearDyn()
+    n = array.size(pP)
+
+    // (C) 장기 추세선 + ATH 부채살 — 시간좌표
+    var array<float> diagVals = array.new<float>()
+    var array<int> diagSrc = array.new<int>()
+    var array<float> diagW = array.new<float>()
+    array.clear(diagVals)
+    array.clear(diagSrc)
+    array.clear(diagW)
+    nearBand = nearBandATR * atr
+    tEnd = time + diagExt * barMs
+    if showDiag and not na(athT) and not na(atlT)
+        [rT, rP] = f_contain(athT, athP, 1, tol)
+        rAnchT = na(rT) ? ithT : rT
+        rAnchP = na(rP) ? lastITH : rP
+        if not na(rAnchT) and valid(rAnchP) and rAnchT > athT
+            sR = (rAnchP - athP) / math.max(1, rAnchT - athT)
+            vR = athP + sR * (time - athT)
+            if valid(vR) and math.abs(vR - close) <= nearBand
+                newLT(athT, athP, tEnd, athP + sR * (tEnd - athT), colDiag, 3, line.style_solid)
+                array.push(diagVals, vR)
+                array.push(diagSrc, 5)
+                array.push(diagW, wDiag)
+        [olT, olP] = f_firstAfter(-1, 0)
+        supT = na(olT) ? atlT : olT
+        supP = na(olP) ? atlP : olP
+        [spT, spP] = f_contain(supT, supP, -1, tol)
+        sAnchT = na(spT) ? itlT : spT
+        sAnchP = na(spP) ? lastITL : spP
+        if not na(supT) and not na(sAnchT) and valid(sAnchP) and sAnchT > supT
+            sS = (sAnchP - supP) / math.max(1, sAnchT - supT)
+            vS = supP + sS * (time - supT)
+            if valid(vS) and math.abs(vS - close) <= nearBand
+                newLT(supT, supP, tEnd, supP + sS * (tEnd - supT), colDiag, 3, line.style_solid)
+                array.push(diagVals, vS)
+                array.push(diagSrc, 5)
+                array.push(diagW, wDiag)
+
+    // (C1) ATH 부채살 — ATH→이후 구조 피벗 fanN개 관통 (스크린샷 검은 선 다발)
+    if fanN > 0 and not na(athT) and n > 0
+        cntF = 0
+        for i = 0 to n - 1
+            if cntF < fanN and array.get(pK, i) >= 1 and array.get(pTm, i) > athT
+                fpT = array.get(pTm, i)
+                fpP = array.get(pP, i)
+                if valid(fpP) and fpT > athT
+                    sF = (fpP - athP) / math.max(1, fpT - athT)
+                    eF = athP + sF * (tEnd - athT)
+                    if valid(eF)
+                        newLT(athT, athP, tEnd, eF, color.new(colFan, 15), 1, line.style_solid)
+                        vF = athP + sF * (time - athT)
+                        if valid(vF) and math.abs(vF - close) <= nearBand
+                            array.push(diagVals, vF)
+                            array.push(diagSrc, 5)
+                            array.push(diagW, wDiag * 0.8)
+                    cntF += 1
+
+    // 극단선
+    if showFar and not na(athT) and not na(atlT)
+        if not na(itlT) and valid(lastITL) and itlT > athT
+            sD = (lastITL - athP) / math.max(1, itlT - athT)
+            eD = athP + sD * (tEnd - athT)
+            if valid(eD)
+                newLT(athT, athP, tEnd, eD, color.new(colDiag, 40), 2, line.style_dashed)
+        [olT2, olP2] = f_firstAfter(-1, 0)
+        if not na(olT2) and not na(ithT) and valid(lastITH) and ithT > olT2
+            sU = (lastITH - olP2) / math.max(1, ithT - olT2)
+            eU = olP2 + sU * (tEnd - olT2)
+            if valid(eU)
+                newLT(olT2, olP2, tEnd, eU, color.new(colDiag, 40), 2, line.style_dashed)
+
+    // (C2) 피치포크 — median + tine + 밴드(0.5 내부 · 1.5/2.0 경고선) = 무지개 채널
+    [fLowT, fLowP] = f_firstAfter(-1, athT)
+    [fHiT, fHiP] = f_firstAfter(1, na(fLowT) ? 9999999999999 : fLowT)
+    if showFork and not na(athT) and not na(fLowT) and not na(fHiT)
+        mxT = (fLowT + fHiT) / 2.0
+        my = (fLowP + fHiP) / 2.0
+        msl = (my - athP) / math.max(1, mxT - athT)
+        medNow = athP + msl * (time - athT)
+        medEnd = athP + msl * (tEnd - athT)
+        offL = fLowP - (athP + msl * (fLowT - athT))    // 하단 tine 오프셋(상수)
+        offH = fHiP - (athP + msl * (fHiT - athT))      // 상단 tine 오프셋(상수)
+        if valid(medEnd)
+            newLT(athT, athP, tEnd, medEnd, color.new(colFork, 0), 3, line.style_solid)
+            array.push(diagVals, medNow)
+            array.push(diagSrc, 7)
+            array.push(diagW, wFork)
+        // tine (1.0)
+        for tOff in array.from(offL, offH)
+            e1 = medEnd + tOff
+            s1v = athP + tOff
+            if valid(e1) and valid(s1v)
+                newLT(athT, s1v, tEnd, e1, color.new(colFork, 30), 2, line.style_dotted)
+                vT = medNow + tOff
+                if valid(vT) and math.abs(vT - close) <= nearBand
+                    array.push(diagVals, vT)
+                    array.push(diagSrc, 7)
+                    array.push(diagW, wFork)
+        // 밴드: 내부 0.5 + 경고선 1.5/2.0 (스크린샷 다중 밴드)
+        if forkBands
+            for m in array.from(0.5, 1.5, 2.0)
+                for tOff in array.from(offL, offH)
+                    s2v = athP + m * tOff
+                    e2 = medEnd + m * tOff
+                    if valid(s2v) and valid(e2)
+                        newLT(athT, s2v, tEnd, e2, color.new(colFork, m == 0.5 ? 60 : 75), 1, line.style_dotted)
+                        vB = medNow + m * tOff
+                        if valid(vB) and math.abs(vB - close) <= nearBand
+                            array.push(diagVals, vB)
+                            array.push(diagSrc, 7)
+                            array.push(diagW, wFork * 0.6)
+
+    // (C3) 넥라인
+    if showNeck and valid(neckline)
+        newL(bar_index - math.min(lookback, 300), neckline, bar_index + diagExt, neckline, color.new(colNeck, 0), 3, line.style_solid)
+        newLab(bar_index + diagExt, neckline, "넥라인 " + str.tostring(neckline, format.mintick), color.new(colNeck, 0), label.style_label_left, color.black)
+        addLvl(neckline, wNeck, 3)
+
+    // (C4) Donchian 채널
+    if showBrk
+        dH = ta.highest(high, donLen)
+        dL = ta.lowest(low, donLen)
+        if valid(dH)
+            newL(bar_index, dH, bar_index + diagExt, dH, color.new(colHi, 30), 2, line.style_dashed)
+            addLvl(dH, wDon, 4)
+        if valid(dL)
+            newL(bar_index, dL, bar_index + diagExt, dL, color.new(colLo, 30), 2, line.style_dashed)
+            addLvl(dL, wDon, 4)
+
+    bull = (msDir > 0 or (not na(lastITH) and close > lastITH)) and (not reqAlign or htfBull)
+    bear = (msDir < 0 or (not na(lastITL) and close < lastITL)) and (not reqAlign or htfBear)
+    legLow  = float(na)
+    legHigh = float(na)
+    legOk   = false
+    legDir  = 0
+    if bull and not na(lastITL) and not na(lastITH) and ithBar > itlBar
+        legLow := lastITL
+        legHigh := lastITH
+        legDir := 1
+        sizeOk = (legHigh - legLow) >= minLegATR * atr and (maxLegATR <= 0 or (legHigh - legLow) <= maxLegATR * atr)
+        legOk := sizeOk
+    else if bear and not na(lastITL) and not na(lastITH) and itlBar > ithBar
+        legLow := lastITL
+        legHigh := lastITH
+        legDir := -1
+        sizeOk = (legHigh - legLow) >= minLegATR * atr and (maxLegATR <= 0 or (legHigh - legLow) <= maxLegATR * atr)
+        legOk := sizeOk
+
+    // (D) 피보 + 듀얼 피보
+    if legOk
+        diff = legHigh - legLow
+        bx = bar_index
+        if showFib
+            rArr = array.from(0.5, oteLo, 0.705, oteHi)
+            for i = 0 to array.size(rArr) - 1
+                r = array.get(rArr, i)
+                py = legDir == 1 ? legHigh - r * diff : legLow + r * diff
+                if valid(py)
+                    newL(bx, py, bx + planExt, py, color.new(colFib, 30), 1, line.style_dotted)
+                    newLab(bx + planExt, py, "fib " + str.tostring(r, "#.###"), color.new(colFib, 100), label.style_none, colFib)
+            if array.size(extMul) > 0
+                for i = 0 to array.size(extMul) - 1
+                    m = array.get(extMul, i)
+                    py = legDir == 1 ? legLow + m * diff : legHigh - m * diff
+                    if valid(py)
+                        newL(bx, py, bx + planExt, py, color.new(colFib, 0), 2, line.style_dashed)
+                        newLab(bx + planExt, py, "ext " + str.tostring(m, "#.###"), color.new(colFib, 100), label.style_none, colFib)
+                        addLvl(py, wFib, 2)
+            if dualFib
+                altIdx = legDir == 1 ? idxRecent(-1, 1) : idxRecent(1, 1)
+                if altIdx >= 0 and array.size(extMul) > 0
+                    altP = array.get(pP, altIdx)
+                    span2 = legDir == 1 ? legHigh - altP : altP - legLow
+                    if span2 > 0
+                        for i = 0 to array.size(extMul) - 1
+                            m = array.get(extMul, i)
+                            py2 = legDir == 1 ? altP + m * span2 : altP - m * span2
+                            if valid(py2)
+                                newL(bx, py2, bx + planExt, py2, color.new(colFib, 55), 1, line.style_dotted)
+                                addLvl(py2, wFib * 0.7, 2)
+
+    // (E) 합류 클러스터 계산
+    clMid = array.new<float>()
+    clScore = array.new<float>()
+    clCnt = array.new<int>()
+    clTxt = array.new<string>()
+    cand = array.new<float>()
+    cw = array.new<float>()
+    csrc = array.new<int>()
+    if array.size(levels) > 0
+        for i = 0 to array.size(levels) - 1
+            l = array.get(levels, i)
+            if l.active and math.abs(l.price - close) < atr * 25
+                array.push(cand, l.price)
+                array.push(cw, l.wt)
+                array.push(csrc, l.src)
+    if array.size(diagVals) > 0
+        for i = 0 to array.size(diagVals) - 1
+            dv = array.get(diagVals, i)
+            if valid(dv) and math.abs(dv - close) < atr * 25
+                array.push(cand, dv)
+                array.push(cw, array.get(diagW, i))
+                array.push(csrc, array.get(diagSrc, i))
+    if array.size(pP) > 0
+        for i = 0 to array.size(pP) - 1
+            if array.get(pK, i) >= 1
+                zp = array.get(pP, i)
+                if valid(zp) and math.abs(zp - close) < atr * 25
+                    array.push(cand, zp)
+                    array.push(cw, wZone)
+                    array.push(csrc, 8)
+    // LTH/LTL — 가장 강한 수평 가격대 (ICT)
+    if array.size(ltLvls) > 0
+        for i = 0 to array.size(ltLvls) - 1
+            lt = array.get(ltLvls, i)
+            if valid(lt) and math.abs(lt - close) < atr * 25
+                array.push(cand, lt)
+                array.push(cw, wLT)
+                array.push(csrc, 8)
+    nC = array.size(cand)
+    if nC > 0
+        for i = 0 to nC - 1
+            cp = array.get(cand, i)
+            cnt = 0
+            wsum = 0.0
+            pacc = 0.0
+            isAnchor = true
+            s1 = false
+            s2 = false
+            s3 = false
+            s4 = false
+            s5 = false
+            s6 = false
+            s7 = false
+            s8 = false
+            s9 = false
+            for j = 0 to nC - 1
+                cj = array.get(cand, j)
+                if math.abs(cj - cp) <= tol
+                    cnt += 1
+                    wsum += array.get(cw, j)
+                    pacc += cj * array.get(cw, j)
+                    sc = array.get(csrc, j)
+                    s1 := s1 or sc == 1
+                    s2 := s2 or sc == 2
+                    s3 := s3 or sc == 3
+                    s4 := s4 or sc == 4
+                    s5 := s5 or sc == 5
+                    s6 := s6 or sc == 6
+                    s7 := s7 or sc == 7
+                    s8 := s8 or sc == 8
+                    s9 := s9 or sc == 9
+                    if cj < cp
+                        isAnchor := false
+            if isAnchor and cnt >= minConf
+                mid = pacc / wsum
+                txt = srcTxt(s2, s5, s3, s4, s1, s6, s7, s8, s9)
+                array.push(clMid, mid)
+                array.push(clScore, wsum)
+                array.push(clCnt, cnt)
+                array.push(clTxt, txt)
+                if showConf
+                    bxc = box.new(bar_index, mid + tol * 0.5, bar_index + diagExt, mid - tol * 0.5, border_color=na, bgcolor=color.new(colConf, 75))
+                    array.push(dynBoxes, bxc)
+                    newLab(bar_index + diagExt, mid, "합류 x" + str.tostring(cnt) + " (" + str.tostring(wsum, "#.#") + ") " + txt, color.new(colConf, 0), label.style_label_left, color.white)
+
+    // (F) 고정(sticky) 셋업 + 쿨다운 + 점수 표시
+    if showPlan
+        dir = bear ? -1 : bull ? 1 : 0
+        bx2 = bar_index
+        x2 = bar_index + planExt
+        // 현재 바이어스 측 최고 점수 (실시간 표시용 — 스크린샷 Score/Required)
+        gBest := 0.0
+        nClv = array.size(clMid)
+        if dir != 0 and nClv > 0
+            for i = 0 to nClv - 1
+                midc = array.get(clMid, i)
+                okSide = dir == -1 ? midc > close : midc < close
+                if okSide and math.abs(midc - close) <= atr * 10
+                    gBest := math.max(gBest, array.get(clScore, i))
+        if barstate.isconfirmed
+            // 1) 무효화 — SL/TP는 정상 종료, 구조역전·리밸런스 극점 침범은 쿨다운 발동
+            if aDir == -1
+                structBad = msDir > 0 or (showReb and valid(rebITH) and close > rebITH)
+                if structBad
+                    standUntil := bar_index + cooldownBars
+                    lastInvDir := aDir
+                    aDir := 0
+                else if high >= aSL or low <= aTP
+                    aDir := 0
+            if aDir == 1
+                structBad = msDir < 0 or (showReb and valid(rebITL) and close < rebITL)
+                if structBad
+                    standUntil := bar_index + cooldownBars
+                    lastInvDir := aDir
+                    aDir := 0
+                else if low <= aSL or high >= aTP
+                    aDir := 0
+            // 2) 새 셋업 — 쿨다운 중에는 같은 방향 금지 ("don't force the trade again")
+            allowDir = bar_index > standUntil or dir != lastInvDir
+            if aDir == 0 and dir != 0 and allowDir
+                bestI = -1
+                bestS = 0.0
+                nCl = array.size(clMid)
+                if nCl > 0
+                    for i = 0 to nCl - 1
+                        midc = array.get(clMid, i)
+                        sc = array.get(clScore, i)
+                        okSide = dir == -1 ? midc > close : midc < close
+                        near = math.abs(midc - close) <= atr * 10
+                        if okSide and near and sc >= minPlanScore and sc > bestS
+                            bestS := sc
+                            bestI := i
+                if bestI >= 0
+                    entry = array.get(clMid, bestI)
+                    capD = maxStopATR * atr
+                    prot = float(na)
+                    npv = array.size(pP)
+                    if npv > 0
+                        for i = 0 to npv - 1
+                            pv = array.get(pP, i)
+                            pt = array.get(pT, i)
+                            if dir == -1 and pt == 1 and pv > entry and (pv - entry) <= capD and (na(prot) or pv < prot)
+                                prot := pv
+                            if dir == 1 and pt == -1 and pv < entry and (entry - pv) <= capD and (na(prot) or pv > prot)
+                                prot := pv
+                    // 리밸런스 극점이 더 가까운 보호 레벨이면 그것을 사용 (ICT 무효화 기준)
+                    if showReb
+                        if dir == -1 and valid(rebITH) and rebITH > entry and (rebITH - entry) <= capD and (na(prot) or rebITH < prot)
+                            prot := rebITH
+                        if dir == 1 and valid(rebITL) and rebITL < entry and (entry - rebITL) <= capD and (na(prot) or rebITL > prot)
+                            prot := rebITL
+                    slStruct = not na(prot) ? (dir == -1 ? prot + slBufATR * atr : prot - slBufATR * atr) : (dir == -1 ? entry + stopN * atr : entry - stopN * atr)
+                    minStop = 0.5 * atr
+                    slv = dir == -1 ? math.max(entry + minStop, math.min(slStruct, entry + capD)) : math.min(entry - minStop, math.max(slStruct, entry - capD))
+                    slv := dir == 1 ? math.max(slv, syminfo.mintick) : slv
+                    rsk = math.abs(entry - slv)
+                    tpv = dir == -1 ? entry - rsk * rrMin : entry + rsk * rrMin
+                    bestT = -1
+                    bestTd = 10000000000.0
+                    if nCl > 0
+                        for i = 0 to nCl - 1
+                            midc = array.get(clMid, i)
+                            onTarget = dir == -1 ? midc < entry - rsk : midc > entry + rsk
+                            if onTarget and math.abs(midc - entry) < bestTd
+                                bestTd := math.abs(midc - entry)
+                                bestT := i
+                    if bestT >= 0
+                        tpv := array.get(clMid, bestT)
+                    aDir := dir
+                    aEntry := entry
+                    aSL := slv
+                    aTP := tpv
+                    aRR := math.abs(tpv - entry) / math.max(syminfo.mintick, rsk)
+                    aTxt := array.get(clTxt, bestI)
+                    aCnt := array.get(clCnt, bestI)
+        // ── 그리기 ──
+        coolLeft = math.max(0, standUntil - bar_index)
+        if aDir != 0 and valid(aEntry) and valid(aSL) and valid(aTP)
+            risk = math.abs(aEntry - aSL)
+            units = risk > 0 ? (acctSize * riskPct / 100.0) / risk : 0.0
+            side = aDir == 1 ? "롱" : "숏"
+            bz = box.new(bx2, aEntry + tol * 0.5, x2, aEntry - tol * 0.5, border_color=color.new(colDiag, 0), bgcolor=color.new(colDiag, 80))
+            array.push(dynBoxes, bz)
+            newL(bx2, aSL, x2, aSL, color.new(#ef5350, 0), 2, line.style_solid)
+            newL(bx2, aTP, x2, aTP, color.new(#26a69a, 0), 2, line.style_solid)
+            newLab(x2, aEntry, "진입(" + side + ") " + str.tostring(aEntry, format.mintick) + " · 근거 " + str.tostring(aCnt) + ": " + aTxt + " · 수량≈" + str.tostring(units, "#.###"), color.new(colDiag, 0), label.style_label_left, color.white)
+            newLab(x2, aSL, "손절 " + str.tostring(aSL, format.mintick), color.new(#ef5350, 0), label.style_label_left, color.white)
+            newLab(x2, aTP, "익절 " + str.tostring(aTP, format.mintick) + "  RR " + str.tostring(aRR, "#.#"), color.new(#26a69a, 0), label.style_label_left, color.white)
+        else if coolLeft > 0 and dir == lastInvDir
+            newLab(x2, close, "재진입 금지 — 구조 재동기화 대기 (" + str.tostring(coolLeft) + "봉)", color.new(#ef5350, 20), label.style_label_left, color.white)
+        else if dir == 0
+            newLab(x2, close, "바이어스 없음 — 대기 · 점수 " + str.tostring(gBest, "#.#") + "/" + str.tostring(minPlanScore, "#.#"), color.new(color.gray, 0), label.style_label_left, color.white)
+        else
+            newLab(x2, close, "자리 대기중 — 점수 " + str.tostring(gBest, "#.#") + " / 필요 " + str.tostring(minPlanScore, "#.#"), color.new(color.gray, 0), label.style_label_left, color.white)
+
+// ───────────── 정보 패널 + 파동 카운트 ─────────────
+var table tb = table.new(position.top_right, 1, 10, border_width=1)
+if barstate.islast
+    locBias = msDir > 0 ? "▲" : msDir < 0 ? "▼" : "—"
+    htfTxt = htfBull ? "▲" : htfBear ? "▼" : "—"
+    eq = na(lastITH) or na(lastITL) ? na : (lastITH + lastITL) / 2.0
+    zone = na(eq) ? "—" : close > eq ? "프리미엄(상단)" : "할인(하단)"
+    action = "대기"
+    if not na(eq)
+        if htfBear and close > eq
+            action := "프리미엄 도달시 숏"
+        else if htfBear and close <= eq
+            action := "ITL 이탈→하방 사다리 추종 / 반등시 관망"
+        else if htfBull and close < eq
+            action := "할인 도달시 롱"
+        else if htfBull and close >= eq
+            action := "ITH 돌파→상방 사다리 추종 / 눌림 대기"
+    bigTxt = trendDir > 0 ? "상승" : trendDir < 0 ? "하락" : "—"
+    patTxt = "미분류"
+    fibTxt = ""
+    np = array.size(pP)
+    if showWave and np >= 6
+        i0 = np - 6
+        P0 = array.get(pP, i0)
+        P1 = array.get(pP, i0 + 1)
+        P2 = array.get(pP, i0 + 2)
+        P3 = array.get(pP, i0 + 3)
+        P4 = array.get(pP, i0 + 4)
+        P5 = array.get(pP, i0 + 5)
+        wdir = P5 < P0 ? -1 : 1
+        L1 = math.abs(P1 - P0)
+        L3 = math.abs(P3 - P2)
+        L5 = math.abs(P5 - P4)
+        L2 = math.abs(P2 - P1)
+        L4 = math.abs(P4 - P3)
+        altOK = wdir == -1 ? (P1 < P0 and P2 > P1 and P3 < P2 and P4 > P3 and P5 < P4) : (P1 > P0 and P2 < P1 and P3 > P2 and P4 < P3 and P5 > P4)
+        w2ok = wdir == -1 ? P2 < P0 : P2 > P0
+        w3notShort = not (L3 < L1 and L3 < L5)
+        w4ok = wdir == -1 ? P4 < P1 : P4 > P1
+        w5prog = wdir == -1 ? P5 < P3 : P5 > P3
+        impulseValid = altOK and w2ok and w3notShort and w4ok and w5prog
+        if impulseValid
+            patTxt := (wdir == -1 ? "하락" : "상승") + " 임펄스 1-5 ✓"
+            newLab(array.get(pB, i0 + 1), P1, "1", color.new(color.purple, 0), P1 > P0 ? label.style_label_down : label.style_label_up, color.white)
+            newLab(array.get(pB, i0 + 2), P2, "2", color.new(color.purple, 0), P2 > P1 ? label.style_label_down : label.style_label_up, color.white)
+            newLab(array.get(pB, i0 + 3), P3, "3", color.new(color.purple, 0), P3 > P2 ? label.style_label_down : label.style_label_up, color.white)
+            newLab(array.get(pB, i0 + 4), P4, "4", color.new(color.purple, 0), P4 > P3 ? label.style_label_down : label.style_label_up, color.white)
+            newLab(array.get(pB, i0 + 5), P5, "5", color.new(color.purple, 0), P5 > P4 ? label.style_label_down : label.style_label_up, color.white)
+            fibTxt := "2파/1파 " + str.tostring(L1 > 0 ? L2 / L1 * 100 : 0, "#") + "% · 3파/1파 " + str.tostring(L1 > 0 ? L3 / L1 * 100 : 0, "#") + "% · 4파/3파 " + str.tostring(L3 > 0 ? L4 / L3 * 100 : 0, "#") + "%"
+        else
+            broke = not altOK ? "교대 안됨" : not w2ok ? "2파가 1파시작 침범" : not w3notShort ? "3파가 최단" : not w4ok ? "4파-1파 겹침" : "5파가 3파 미달(4·5 동일위치)"
+            patTxt := "임펄스 무효 [" + broke + "]"
+            Q0 = array.get(pP, np - 4)
+            Q1 = array.get(pP, np - 3)
+            Q2 = array.get(pP, np - 2)
+            Q3 = array.get(pP, np - 1)
+            cdir = Q1 < Q0 ? -1 : 1
+            aOk = cdir == -1 ? (Q1 < Q0 and Q2 > Q1 and Q3 < Q2) : (Q1 > Q0 and Q2 < Q1 and Q3 > Q2)
+            cBeyondA = cdir == -1 ? Q3 < Q1 : Q3 > Q1
+            irregular = cdir == -1 ? Q2 > Q0 : Q2 < Q0
+            if aOk and cBeyondA
+                patTxt := (irregular ? "불규칙(확장) 조정 A-B-C" : "조정 A-B-C")
+                newLab(array.get(pB, np - 3), Q1, "A", color.new(color.teal, 0), Q1 > Q0 ? label.style_label_down : label.style_label_up, color.white)
+                newLab(array.get(pB, np - 2), Q2, "B", color.new(color.teal, 0), Q2 > Q1 ? label.style_label_down : label.style_label_up, color.white)
+                newLab(array.get(pB, np - 1), Q3, "C", color.new(color.teal, 0), Q3 > Q2 ? label.style_label_down : label.style_label_up, color.white)
+    [nRule, nCond, nCat, nDir, nLean] = f_neely()
+    neelyTxt = nRule == 0 ? "데이터 부족" : "Rule " + str.tostring(nRule) + nCond + nCat + " · " + nDir
+    mom = atr > 0 ? (close - close[3]) / (3 * atr) : 0.0
+    re = atr > 0 ? (high - low) / atr : 0.0
+    momStr = math.abs(mom) >= 0.6 or re >= 1.5 ? "강" : math.abs(mom) >= 0.3 ? "중" : "약"
+    momTxt = (mom > 0 ? "▲" : mom < 0 ? "▼" : "—") + momStr + " (3봉 " + str.tostring(mom * 100, "#") + "% / 바폭 " + str.tostring(re, "#.#") + "N / 거래량 " + str.tostring(volMA > 0 ? volume / volMA * 100 : 0, "#") + "%)"
+    bsl = float(na)
+    ssl = float(na)
+    np2 = array.size(pP)
+    if np2 > 1
+        for i = 0 to np2 - 1
+            pv = array.get(pP, i)
+            ty = array.get(pT, i)
+            cntEq = 0
+            for j = 0 to np2 - 1
+                if i != j and array.get(pT, j) == ty and math.abs(array.get(pP, j) - pv) <= tol
+                    cntEq += 1
+            if cntEq >= 1
+                if ty == 1 and pv > close and (na(bsl) or pv < bsl)
+                    bsl := pv
+                if ty == -1 and pv < close and (na(ssl) or pv > ssl)
+                    ssl := pv
+    coolLeft2 = math.max(0, standUntil - bar_index)
+    rebTxt = (valid(rebITH) ? "rITH " + str.tostring(rebITH, format.mintick) : "rITH —") + " / " + (valid(rebITL) ? "rITL " + str.tostring(rebITL, format.mintick) : "rITL —")
+    table.cell(tb, 0, 0, "WCSE v4", text_color=color.white, bgcolor=color.new(#263238, 0), text_size=size.small)
+    table.cell(tb, 0, 1, "구조 " + locBias + "  상위TF " + htfTxt + "  " + zone, text_color=color.white, bgcolor=color.new(#37474f, 0), text_size=size.small)
+    table.cell(tb, 0, 2, "→ " + action, text_color=color.yellow, bgcolor=color.new(#37474f, 0), text_size=size.small)
+    table.cell(tb, 0, 3, "Neely " + neelyTxt, text_color=color.orange, bgcolor=color.new(#263238, 0), text_size=size.tiny)
+    table.cell(tb, 0, 4, "→ " + nLean, text_color=color.orange, bgcolor=color.new(#263238, 0), text_size=size.tiny)
+    table.cell(tb, 0, 5, "파동: " + patTxt + (fibTxt == "" ? "" : " · " + fibTxt), text_color=color.aqua, bgcolor=color.new(#263238, 0), text_size=size.tiny)
+    table.cell(tb, 0, 6, "모멘텀 " + momTxt, text_color=color.white, bgcolor=color.new(#263238, 0), text_size=size.tiny)
+    table.cell(tb, 0, 7, "유동성 BSL " + (valid(bsl) ? str.tostring(bsl, format.mintick) : "—") + " / SSL " + (valid(ssl) ? str.tostring(ssl, format.mintick) : "—") + " · " + rebTxt, text_color=color.white, bgcolor=color.new(#263238, 0), text_size=size.tiny)
+    table.cell(tb, 0, 8, "셋업점수 " + str.tostring(gBest, "#.#") + " / 필요 " + str.tostring(minPlanScore, "#.#") + (coolLeft2 > 0 ? " · 쿨다운 " + str.tostring(coolLeft2) + "봉" : ""), text_color=colConf, bgcolor=color.new(#263238, 0), text_size=size.tiny)
+    table.cell(tb, 0, 9, "N(ATR) " + str.tostring(atr, format.mintick) + " · 넥라인 " + (valid(neckline) ? str.tostring(neckline, format.mintick) : "—"), text_color=colNeck, bgcolor=color.new(#263238, 0), text_size=size.tiny)

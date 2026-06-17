@@ -1,0 +1,85 @@
+# WCSE v3 backtester config — mirrors WCSE_engine_v3_19.pine defaults
+
+data:
+  exchange: binance
+  symbols: [BTC/USDT, ETH/USDT, SOL/USDT, XRP/USDT]
+  timeframes: [15m, 1h, 4h, 1d]
+  since: "2022-01-01T00:00:00Z"     # earliest start; ccxt clamps to exchange listing
+  cache_dir: data_cache
+
+fees:
+  taker_bps: 5.0                    # 0.05% per fill
+  slippage_ticks: 1
+  tick_size:                        # rough mintick per symbol (USDT)
+    "BTC/USDT": 0.1
+    "ETH/USDT": 0.01
+    "SOL/USDT": 0.001
+    "XRP/USDT": 0.0001
+
+walk_forward:
+  oos_pct: 0.30                     # last 30% reserved for out-of-sample
+
+# --- Pine defaults (do not change to "improve" — these ARE v3) ---
+pine_defaults:
+  swLen: 8
+  minLegATR: 1.5
+  maxLegATR: 0.0                    # 0 = off
+  maxPiv: 80
+  lookback: 400
+  biasTF: 4h                        # higher-TF bias
+  htfLen: 50
+  reqAlign: true
+  ext_multiples: [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.13, 1.272, 1.414, 1.618, 1.886, 2.618]
+  dualFib: true
+  nearBandATR: 8.0
+  wickRatio: 0.55
+  consume: true
+  confTolA: 0.5                     # tol = ATR * confTolA
+  minConf: 2
+  oteLo: 0.62                       # display only
+  oteHi: 0.79                       # display only
+  slBufATR: 0.5
+  rrMin: 2.0
+  minPlanScore: 3.0
+  maxStopATR: 4.0
+  donLen: 20
+  rngK: 1.2
+  stopN: 2.0
+  riskPct: 1.0
+  acctSize: 10000
+  atrLen: 14
+  volMA: 20
+  volSpike_x: 1.3
+  weights:
+    wFib: 1.5
+    wDiag: 1.5
+    wFork: 1.0
+    wNeck: 0.5
+    wWick: 1.0
+    wFvg: 1.0
+    wDon: 1.0
+    wZone: 1.2
+
+# --- experiment grid for the full sweep ---
+grid:
+  symbols: [BTC/USDT]                       # narrow for first sweep (override data.symbols)
+  timeframes: [1d, 4h, 1h]                  # 15m excluded for runtime
+  entry_modes: [reversion, breakout, both]
+  neely_gate: ["off", "on"]                 # quoted — bare off/on is YAML boolean
+  vol_gate: ["on", "off"]
+  minPlanScore: [2.5, 3.0, 4.0]
+  weight_preset: [default, fib_diag_emph]   # fib_diag_emph: wFib=2.0, wDiag=2.0
+
+weight_presets:
+  default:    {wFib: 1.5, wDiag: 1.5, wFork: 1.0, wNeck: 0.5, wWick: 1.0, wFvg: 1.0, wDon: 1.0, wZone: 1.2}
+  fib_diag_emph: {wFib: 2.0, wDiag: 2.0, wFork: 1.0, wNeck: 0.5, wWick: 1.0, wFvg: 1.0, wDon: 1.0, wZone: 1.2}
+
+# --- MVP run (sanity first) ---
+mvp:
+  symbol: BTC/USDT
+  timeframe: 1d
+  entry_mode: reversion
+  neely_gate: off
+  vol_gate: on
+  minPlanScore: 3.0
+  weight_preset: default

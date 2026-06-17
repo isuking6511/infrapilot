@@ -1,0 +1,29 @@
+// ============================================================================
+// btc_bias 이식용 스니펫 — 어떤 WCSE Pine 버전에도 3구역에 붙여넣기
+// 규칙: 알트 차트에서 BTC가 EMA 위일 때만 롱, 아래일 때만 숏 허용 (BTC 차트 자체엔 미적용 옵션)
+// ============================================================================
+
+// ── [구역 1] 입력부 (다른 input 그룹들 근처에 붙여넣기) ──
+gBB = "⑥-B BTC 바이어스 가드"
+useBtcBias = input.bool(true, "BTC EMA 바이어스 가드", group=gBB, tooltip="알트 차트: BTC가 EMA 위=롱만, 아래=숏만. 백테스트된 btc_bias 룰과 동일하게 맞출 것")
+btcSym     = input.symbol("BINANCE:BTCUSDT", "BTC 심볼", group=gBB)
+btcTF      = input.timeframe("D", "BTC 판정 TF", group=gBB)
+btcEmaLen  = input.int(200, "BTC EMA 길이", group=gBB, minval=5)
+btcSelfOff = input.bool(true, "BTC 차트엔 미적용", group=gBB)
+
+// ── [구역 2] 계산부 (request.security 쓰는 상위TF 바이어스 근처, 전역) ──
+btcC  = request.security(btcSym, btcTF, close[1], lookahead=barmerge.lookahead_off)
+btcE  = request.security(btcSym, btcTF, ta.ema(close, btcEmaLen)[1], lookahead=barmerge.lookahead_off)
+isBtcChart = str.contains(str.upper(syminfo.ticker), "BTC")
+btcBull = btcC > btcE
+btcBear = btcC < btcE
+btcGateL = not useBtcBias or (btcSelfOff and isBtcChart) or btcBull   // 롱 허용
+btcGateS = not useBtcBias or (btcSelfOff and isBtcChart) or btcBear   // 숏 허용
+
+// ── [구역 3] 게이트 적용 (플랜의 bull/bear 정의 줄에 and로 추가) ──
+// 기존:  bull = (msDir > 0 or ...) and (not reqAlign or htfBull)
+// 변경:  bull = (msDir > 0 or ...) and (not reqAlign or htfBull) and btcGateL
+// 기존:  bear = (msDir < 0 or ...) and (not reqAlign or htfBear)
+// 변경:  bear = (msDir < 0 or ...) and (not reqAlign or htfBear) and btcGateS
+//
+// (선택) 패널 표시: 구조/상위TF 행에  + "  BTC " + (btcBull ? "▲" : btcBear ? "▼" : "—")

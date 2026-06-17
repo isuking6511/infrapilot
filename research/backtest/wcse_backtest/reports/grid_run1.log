@@ -1,0 +1,237 @@
+=== GRID RUN ===
+  symbols=['BTC/USDT']  TFs=['1d', '4h', '1h']
+  entry_modes=['reversion', 'breakout', 'both']  neely=[False, True]  vol=[True, False]
+  minPlanScore=[2.5, 3.0, 4.0]  weight_presets=['default', 'fib_diag_emph']
+  total runs: 216
+  [1/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_default  IS=-0.41R(n=11)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [2/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.46R(n=12)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [3/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_default  IS=-0.49R(n=7)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [4/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.41R(n=11)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [5/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_default  IS=-0.75R(n=6)  OOS=-0.37R(n=4)  OOS_PF=0.51
+  [6/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.56R(n=8)  OOS=-0.46R(n=7)  OOS_PF=0.37
+  [7/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_default  IS=-0.41R(n=11)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [8/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.46R(n=12)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [9/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_default  IS=-0.49R(n=7)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [10/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.41R(n=11)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [11/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_default  IS=-0.75R(n=6)  OOS=-0.37R(n=4)  OOS_PF=0.51
+  [12/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.56R(n=8)  OOS=-0.46R(n=7)  OOS_PF=0.37
+  [13/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_default  IS=-0.41R(n=11)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [14/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.46R(n=12)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [15/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_default  IS=-0.49R(n=7)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [16/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.41R(n=11)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [17/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_default  IS=-0.75R(n=6)  OOS=-0.37R(n=4)  OOS_PF=0.51
+  [18/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.56R(n=8)  OOS=-0.46R(n=7)  OOS_PF=0.37
+  [19/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_default  IS=-0.41R(n=11)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [20/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.46R(n=12)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [21/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_default  IS=-0.49R(n=7)  OOS=-0.21R(n=8)  OOS_PF=0.67
+  [22/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.41R(n=11)  OOS=-0.53R(n=8)  OOS_PF=0.31
+  [23/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_default  IS=-0.75R(n=6)  OOS=-0.37R(n=4)  OOS_PF=0.51
+  [24/216] BTCUSDT_1d_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.56R(n=8)  OOS=-0.46R(n=7)  OOS_PF=0.37
+  [25/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [26/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [27/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [28/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [29/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [30/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [31/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [32/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [33/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [34/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [35/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [36/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [37/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [38/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [39/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [40/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [41/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [42/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [43/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [44/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [45/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [46/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [47/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_default  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [48/216] BTCUSDT_1d_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.36R(n=40)  OOS=+0.14R(n=27)  OOS_PF=1.40
+  [49/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_default  IS=-0.14R(n=28)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [50/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.16R(n=30)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [51/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps3.0_default  IS=+0.31R(n=40)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [52/216] BTCUSDT_1d_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.02R(n=33)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [53/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_default  IS=+0.27R(n=42)  OOS=-0.06R(n=21)  OOS_PF=0.83
+  [54/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.24R(n=42)  OOS=-0.19R(n=19)  OOS_PF=0.56
+  [55/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_default  IS=-0.14R(n=28)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [56/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.16R(n=30)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [57/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps3.0_default  IS=+0.31R(n=40)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [58/216] BTCUSDT_1d_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.02R(n=33)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [59/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_default  IS=+0.27R(n=42)  OOS=-0.06R(n=21)  OOS_PF=0.83
+  [60/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.24R(n=42)  OOS=-0.19R(n=19)  OOS_PF=0.56
+  [61/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_default  IS=-0.14R(n=28)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [62/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.16R(n=30)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [63/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps3.0_default  IS=+0.31R(n=40)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [64/216] BTCUSDT_1d_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.02R(n=33)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [65/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_default  IS=+0.27R(n=42)  OOS=-0.06R(n=21)  OOS_PF=0.83
+  [66/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.24R(n=42)  OOS=-0.19R(n=19)  OOS_PF=0.56
+  [67/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_default  IS=-0.14R(n=28)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [68/216] BTCUSDT_1d_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.16R(n=30)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [69/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps3.0_default  IS=+0.31R(n=40)  OOS=-0.08R(n=20)  OOS_PF=0.79
+  [70/216] BTCUSDT_1d_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.02R(n=33)  OOS=-0.21R(n=20)  OOS_PF=0.50
+  [71/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_default  IS=+0.27R(n=42)  OOS=-0.06R(n=21)  OOS_PF=0.83
+  [72/216] ⚠️ BTCUSDT_1d_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.24R(n=42)  OOS=-0.19R(n=19)  OOS_PF=0.56
+  [73/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.33R(n=98)  OOS=-0.08R(n=43)  OOS_PF=0.89
+  [74/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.26R(n=107)  OOS=-0.05R(n=41)  OOS_PF=0.93
+  [75/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.28R(n=82)  OOS=+0.17R(n=35)  OOS_PF=1.27
+  [76/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.24R(n=100)  OOS=-0.02R(n=40)  OOS_PF=0.98
+  [77/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.29R(n=39)  OOS=-0.11R(n=21)  OOS_PF=0.85
+  [78/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.22R(n=73)  OOS=+0.01R(n=29)  OOS_PF=1.01
+  [79/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.33R(n=98)  OOS=-0.08R(n=43)  OOS_PF=0.89
+  [80/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.26R(n=107)  OOS=-0.05R(n=41)  OOS_PF=0.93
+  [81/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.28R(n=82)  OOS=+0.17R(n=35)  OOS_PF=1.27
+  [82/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.24R(n=100)  OOS=-0.02R(n=40)  OOS_PF=0.98
+  [83/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.29R(n=39)  OOS=-0.11R(n=21)  OOS_PF=0.85
+  [84/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.22R(n=73)  OOS=+0.01R(n=29)  OOS_PF=1.01
+  [85/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.33R(n=98)  OOS=-0.08R(n=43)  OOS_PF=0.89
+  [86/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.26R(n=107)  OOS=-0.05R(n=41)  OOS_PF=0.93
+  [87/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.28R(n=82)  OOS=+0.17R(n=35)  OOS_PF=1.27
+  [88/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.24R(n=100)  OOS=-0.02R(n=40)  OOS_PF=0.98
+  [89/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.29R(n=39)  OOS=-0.11R(n=21)  OOS_PF=0.85
+  [90/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.22R(n=73)  OOS=+0.01R(n=29)  OOS_PF=1.01
+  [91/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.33R(n=98)  OOS=-0.08R(n=43)  OOS_PF=0.89
+  [92/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.26R(n=107)  OOS=-0.05R(n=41)  OOS_PF=0.93
+  [93/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.28R(n=82)  OOS=+0.17R(n=35)  OOS_PF=1.27
+  [94/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.24R(n=100)  OOS=-0.02R(n=40)  OOS_PF=0.98
+  [95/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.29R(n=39)  OOS=-0.11R(n=21)  OOS_PF=0.85
+  [96/216] BTCUSDT_4h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.22R(n=73)  OOS=+0.01R(n=29)  OOS_PF=1.01
+  [97/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [98/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [99/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [100/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [101/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [102/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [103/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [104/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [105/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [106/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [107/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [108/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [109/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [110/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [111/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [112/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [113/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [114/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [115/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [116/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [117/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [118/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [119/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_default  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [120/216] ⚠️ BTCUSDT_4h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.15R(n=295)  OOS=-0.00R(n=138)  OOS_PF=0.99
+  [121/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_default  IS=-0.07R(n=238)  OOS=-0.09R(n=107)  OOS_PF=0.80
+  [122/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.06R(n=243)  OOS=-0.08R(n=105)  OOS_PF=0.83
+  [123/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=255)  OOS=-0.04R(n=115)  OOS_PF=0.90
+  [124/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.04R(n=252)  OOS=-0.10R(n=109)  OOS_PF=0.77
+  [125/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_default  IS=+0.11R(n=262)  OOS=-0.05R(n=133)  OOS_PF=0.88
+  [126/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.01R(n=258)  OOS=-0.04R(n=126)  OOS_PF=0.90
+  [127/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_default  IS=-0.07R(n=238)  OOS=-0.09R(n=107)  OOS_PF=0.80
+  [128/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.06R(n=243)  OOS=-0.08R(n=105)  OOS_PF=0.83
+  [129/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=255)  OOS=-0.04R(n=115)  OOS_PF=0.90
+  [130/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.04R(n=252)  OOS=-0.10R(n=109)  OOS_PF=0.77
+  [131/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_default  IS=+0.11R(n=262)  OOS=-0.05R(n=133)  OOS_PF=0.88
+  [132/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.01R(n=258)  OOS=-0.04R(n=126)  OOS_PF=0.90
+  [133/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_default  IS=-0.07R(n=238)  OOS=-0.09R(n=107)  OOS_PF=0.80
+  [134/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.06R(n=243)  OOS=-0.08R(n=105)  OOS_PF=0.83
+  [135/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=255)  OOS=-0.04R(n=115)  OOS_PF=0.90
+  [136/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.04R(n=252)  OOS=-0.10R(n=109)  OOS_PF=0.77
+  [137/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_default  IS=+0.11R(n=262)  OOS=-0.05R(n=133)  OOS_PF=0.88
+  [138/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.01R(n=258)  OOS=-0.04R(n=126)  OOS_PF=0.90
+  [139/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_default  IS=-0.07R(n=238)  OOS=-0.09R(n=107)  OOS_PF=0.80
+  [140/216] BTCUSDT_4h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.06R(n=243)  OOS=-0.08R(n=105)  OOS_PF=0.83
+  [141/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=255)  OOS=-0.04R(n=115)  OOS_PF=0.90
+  [142/216] BTCUSDT_4h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.04R(n=252)  OOS=-0.10R(n=109)  OOS_PF=0.77
+  [143/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_default  IS=+0.11R(n=262)  OOS=-0.05R(n=133)  OOS_PF=0.88
+  [144/216] ⚠️ BTCUSDT_4h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=+0.01R(n=258)  OOS=-0.04R(n=126)  OOS_PF=0.90
+  [145/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.13R(n=517)  OOS=-0.00R(n=215)  OOS_PF=1.00
+  [146/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=537)  OOS=+0.01R(n=231)  OOS_PF=1.01
+  [147/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.17R(n=445)  OOS=+0.08R(n=183)  OOS_PF=1.11
+  [148/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=512)  OOS=+0.01R(n=226)  OOS_PF=1.01
+  [149/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.13R(n=255)  OOS=+0.11R(n=100)  OOS_PF=1.16
+  [150/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.12R(n=366)  OOS=+0.09R(n=161)  OOS_PF=1.13
+  [151/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.13R(n=517)  OOS=-0.00R(n=215)  OOS_PF=1.00
+  [152/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=537)  OOS=+0.01R(n=231)  OOS_PF=1.01
+  [153/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.17R(n=445)  OOS=+0.08R(n=183)  OOS_PF=1.11
+  [154/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=512)  OOS=+0.01R(n=226)  OOS_PF=1.01
+  [155/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.13R(n=255)  OOS=+0.11R(n=100)  OOS_PF=1.16
+  [156/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.12R(n=366)  OOS=+0.09R(n=161)  OOS_PF=1.13
+  [157/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.13R(n=517)  OOS=-0.00R(n=215)  OOS_PF=1.00
+  [158/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=537)  OOS=+0.01R(n=231)  OOS_PF=1.01
+  [159/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.17R(n=445)  OOS=+0.08R(n=183)  OOS_PF=1.11
+  [160/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=512)  OOS=+0.01R(n=226)  OOS_PF=1.01
+  [161/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.13R(n=255)  OOS=+0.11R(n=100)  OOS_PF=1.16
+  [162/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.12R(n=366)  OOS=+0.09R(n=161)  OOS_PF=1.13
+  [163/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_default  IS=-0.13R(n=517)  OOS=-0.00R(n=215)  OOS_PF=1.00
+  [164/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=537)  OOS=+0.01R(n=231)  OOS_PF=1.01
+  [165/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.17R(n=445)  OOS=+0.08R(n=183)  OOS_PF=1.11
+  [166/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=512)  OOS=+0.01R(n=226)  OOS_PF=1.01
+  [167/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.13R(n=255)  OOS=+0.11R(n=100)  OOS_PF=1.16
+  [168/216] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.12R(n=366)  OOS=+0.09R(n=161)  OOS_PF=1.13
+  [169/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [170/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [171/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [172/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [173/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [174/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [175/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [176/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [177/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [178/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [179/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [180/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [181/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [182/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [183/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [184/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [185/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [186/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [187/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [188/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [189/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [190/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [191/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_default  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [192/216] BTCUSDT_1h_breakout_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.05R(n=1121)  OOS=-0.01R(n=493)  OOS_PF=0.97
+  [193/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_default  IS=-0.11R(n=839)  OOS=+0.03R(n=337)  OOS_PF=1.05
+  [194/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=853)  OOS=+0.03R(n=346)  OOS_PF=1.06
+  [195/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_default  IS=-0.11R(n=911)  OOS=+0.06R(n=370)  OOS_PF=1.11
+  [196/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=882)  OOS=+0.04R(n=362)  OOS_PF=1.07
+  [197/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_default  IS=-0.08R(n=1025)  OOS=-0.01R(n=449)  OOS_PF=0.98
+  [198/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.07R(n=983)  OOS=+0.01R(n=425)  OOS_PF=1.01
+  [199/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_default  IS=-0.11R(n=839)  OOS=+0.03R(n=337)  OOS_PF=1.05
+  [200/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=853)  OOS=+0.03R(n=346)  OOS_PF=1.06
+  [201/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_default  IS=-0.11R(n=911)  OOS=+0.06R(n=370)  OOS_PF=1.11
+  [202/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=882)  OOS=+0.04R(n=362)  OOS_PF=1.07
+  [203/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_default  IS=-0.08R(n=1025)  OOS=-0.01R(n=449)  OOS_PF=0.98
+  [204/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.07R(n=983)  OOS=+0.01R(n=425)  OOS_PF=1.01
+  [205/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_default  IS=-0.11R(n=839)  OOS=+0.03R(n=337)  OOS_PF=1.05
+  [206/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=853)  OOS=+0.03R(n=346)  OOS_PF=1.06
+  [207/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_default  IS=-0.11R(n=911)  OOS=+0.06R(n=370)  OOS_PF=1.11
+  [208/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=882)  OOS=+0.04R(n=362)  OOS_PF=1.07
+  [209/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_default  IS=-0.08R(n=1025)  OOS=-0.01R(n=449)  OOS_PF=0.98
+  [210/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.07R(n=983)  OOS=+0.01R(n=425)  OOS_PF=1.01
+  [211/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_default  IS=-0.11R(n=839)  OOS=+0.03R(n=337)  OOS_PF=1.05
+  [212/216] BTCUSDT_1h_both_neely-off_vol-off_mps2.5_fib_diag_emph  IS=-0.09R(n=853)  OOS=+0.03R(n=346)  OOS_PF=1.06
+  [213/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_default  IS=-0.11R(n=911)  OOS=+0.06R(n=370)  OOS_PF=1.11
+  [214/216] BTCUSDT_1h_both_neely-off_vol-off_mps3.0_fib_diag_emph  IS=-0.11R(n=882)  OOS=+0.04R(n=362)  OOS_PF=1.07
+  [215/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_default  IS=-0.08R(n=1025)  OOS=-0.01R(n=449)  OOS_PF=0.98
+  [216/216] BTCUSDT_1h_both_neely-off_vol-off_mps4.0_fib_diag_emph  IS=-0.07R(n=983)  OOS=+0.01R(n=425)  OOS_PF=1.01
+
+=== TOP 10 OOS LEADERBOARD ===
+                                                     run_id  OOS_n_trades  OOS_win_rate  OOS_profit_factor  OOS_expectancy_r  OOS_total_r  OOS_max_dd_pct  IS_expectancy_r  overfit_flag
+      BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default            35        0.4000              1.266            0.1699        5.945          1.1405          -0.2763         False
+      BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default            35        0.4000              1.266            0.1699        5.945          1.1405          -0.2763         False
+      BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default            35        0.4000              1.266            0.1699        5.945          1.1405          -0.2763         False
+      BTCUSDT_4h_reversion_neely-off_vol-off_mps3.0_default            35        0.4000              1.266            0.1699        5.945          1.1405          -0.2763         False
+      BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           100        0.4000              1.161            0.1095       10.951          0.4871          -0.1329         False
+      BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           100        0.4000              1.161            0.1095       10.951          0.4871          -0.1329         False
+      BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           100        0.4000              1.161            0.1095       10.951          0.4871          -0.1329         False
+      BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           100        0.4000              1.161            0.1095       10.951          0.4871          -0.1329         False
+BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph           161        0.3913              1.134            0.0947       15.248          0.7751          -0.1212         False
+BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_fib_diag_emph           161        0.3913              1.134            0.0947       15.248          0.7751          -0.1212         False
+
+  full leaderboard → /Users/gimjiho/Desktop/test/wcse_backtest/reports/leaderboard.csv
+EXITCODE=0

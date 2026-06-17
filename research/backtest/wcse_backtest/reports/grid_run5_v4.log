@@ -1,0 +1,37 @@
+=== GRID RUN ===
+  symbols=['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']  TFs=['1h']
+  entry_modes=['reversion']  neely=['off']  vol=['off']
+  minPlanScore=[3.0, 4.0]  weight_presets=['default']
+  total runs: 16
+  [1/16] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.07R(n=475)  OOS=-0.01R(n=170)  OOS_PF=0.97
+  [2/16] BTCUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.07R(n=475)  OOS=-0.01R(n=170)  OOS_PF=0.97
+  [3/16] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.09R(n=363)  OOS=+0.11R(n=121)  OOS_PF=1.26
+  [4/16] BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.09R(n=363)  OOS=+0.11R(n=121)  OOS_PF=1.26
+  [5/16] ETHUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.02R(n=402)  OOS=-0.10R(n=169)  OOS_PF=0.75
+  [6/16] ⚠️ ETHUSDT_1h_reversion_neely-off_vol-off_mps3.0_default_btcb  IS=+0.01R(n=346)  OOS=-0.08R(n=143)  OOS_PF=0.78
+  [7/16] ETHUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.05R(n=301)  OOS=-0.07R(n=131)  OOS_PF=0.84
+  [8/16] ⚠️ ETHUSDT_1h_reversion_neely-off_vol-off_mps4.0_default_btcb  IS=+0.01R(n=262)  OOS=-0.06R(n=110)  OOS_PF=0.86
+  [9/16] SOLUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=-0.00R(n=437)  OOS=+0.06R(n=174)  OOS_PF=1.16
+  [10/16] SOLUSDT_1h_reversion_neely-off_vol-off_mps3.0_default_btcb  IS=-0.01R(n=369)  OOS=+0.06R(n=142)  OOS_PF=1.18
+  [11/16] SOLUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.01R(n=336)  OOS=+0.03R(n=141)  OOS_PF=1.08
+  [12/16] SOLUSDT_1h_reversion_neely-off_vol-off_mps4.0_default_btcb  IS=-0.04R(n=281)  OOS=+0.04R(n=114)  OOS_PF=1.13
+  [13/16] XRPUSDT_1h_reversion_neely-off_vol-off_mps3.0_default  IS=+0.01R(n=456)  OOS=+0.02R(n=202)  OOS_PF=1.06
+  [14/16] XRPUSDT_1h_reversion_neely-off_vol-off_mps3.0_default_btcb  IS=-0.01R(n=352)  OOS=+0.05R(n=165)  OOS_PF=1.14
+  [15/16] XRPUSDT_1h_reversion_neely-off_vol-off_mps4.0_default  IS=-0.02R(n=360)  OOS=+0.02R(n=146)  OOS_PF=1.05
+  [16/16] XRPUSDT_1h_reversion_neely-off_vol-off_mps4.0_default_btcb  IS=-0.04R(n=279)  OOS=+0.07R(n=119)  OOS_PF=1.16
+
+=== TOP 10 OOS LEADERBOARD ===
+                                                    run_id  OOS_n_trades  OOS_win_rate  OOS_profit_factor  OOS_expectancy_r  OOS_total_r  OOS_max_dd_pct  IS_expectancy_r  overfit_flag
+     BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           121        0.3719              1.263            0.1111       13.441          0.5649          -0.0926         False
+     BTCUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           121        0.3719              1.263            0.1111       13.441          0.5649          -0.0926         False
+SOLUSDT_1h_reversion_neely-off_vol-off_mps3.0_default_btcb           142        0.4789              1.184            0.0648        9.195          0.7338          -0.0080         False
+XRPUSDT_1h_reversion_neely-off_vol-off_mps4.0_default_btcb           119        0.4286              1.156            0.0651        7.746          2.5946          -0.0380         False
+     SOLUSDT_1h_reversion_neely-off_vol-off_mps3.0_default           174        0.4655              1.165            0.0610       10.615          0.6601          -0.0004         False
+XRPUSDT_1h_reversion_neely-off_vol-off_mps3.0_default_btcb           165        0.4121              1.137            0.0541        8.932         15.8561          -0.0135         False
+SOLUSDT_1h_reversion_neely-off_vol-off_mps4.0_default_btcb           114        0.4561              1.126            0.0443        5.048          0.7750          -0.0357         False
+     SOLUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           141        0.4397              1.078            0.0297        4.194          0.8076          -0.0053         False
+     XRPUSDT_1h_reversion_neely-off_vol-off_mps3.0_default           202        0.4109              1.060            0.0244        4.930         20.7527           0.0070         False
+     XRPUSDT_1h_reversion_neely-off_vol-off_mps4.0_default           146        0.4178              1.045            0.0195        2.842          3.9526          -0.0218         False
+
+  full leaderboard → /Users/gimjiho/Desktop/test/wcse_backtest/reports/leaderboard.csv
+EXITCODE=0

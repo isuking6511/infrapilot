@@ -1,0 +1,95 @@
+# WCSE v3 backtester config — mirrors WCSE_engine_v3_19.pine defaults
+
+data:
+  exchange: binance
+  symbols: [BTC/USDT, ETH/USDT, SOL/USDT, XRP/USDT]
+  timeframes: [15m, 1h, 4h, 1d]
+  since: "2022-01-01T00:00:00Z"     # earliest start; ccxt clamps to exchange listing
+  cache_dir: data_cache
+
+fees:
+  taker_bps: 5.0                    # 0.05% per fill
+  slippage_ticks: 1
+  tick_size:                        # rough mintick per symbol (USDT)
+    "BTC/USDT": 0.1
+    "ETH/USDT": 0.01
+    "SOL/USDT": 0.001
+    "XRP/USDT": 0.0001
+
+walk_forward:
+  oos_pct: 0.30                     # last 30% reserved for out-of-sample
+
+# --- Pine defaults (do not change to "improve" — these ARE v3) ---
+pine_defaults:
+  swLen: 8
+  minLegATR: 1.5
+  maxLegATR: 0.0                    # 0 = off
+  maxPiv: 80
+  lookback: 400
+  biasTF: 4h                        # higher-TF bias
+  htfLen: 50
+  reqAlign: true
+  ext_multiples: [0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.13, 1.272, 1.414, 1.618, 1.886, 2.618]
+  dualFib: true
+  nearBandATR: 8.0
+  wickRatio: 0.55
+  consume: true
+  confTolA: 0.5                     # tol = ATR * confTolA
+  minConf: 2
+  oteLo: 0.62                       # display only
+  oteHi: 0.79                       # display only
+  slBufATR: 0.5
+  rrMin: 2.0
+  minPlanScore: 3.0
+  maxStopATR: 4.0
+  donLen: 20
+  rngK: 1.2
+  stopN: 2.0
+  riskPct: 1.0
+  acctSize: 10000
+  atrLen: 14
+  volMA: 20
+  volSpike_x: 1.3
+  weights:
+    wFib: 1.5
+    wDiag: 1.5
+    wFork: 1.0
+    wNeck: 0.5
+    wWick: 1.0
+    wFvg: 1.0
+    wDon: 1.0
+    wZone: 1.2
+    wOB: 1.2                        # v4 order block
+    wLT: 1.8                        # v4 LTH/LTL + rebalance pivots
+  # v4 ICT options
+  showReb: true                     # rebalance ITH/ITL (FVG-fill extreme)
+  showOB: true                      # order block on BOS
+  showSD: true                      # SD targets on BOS (1/2/2.5 × prior leg)
+  cooldownBars: 20                  # post-invalidation same-direction block
+  fanN: 4                           # ATH fan lines through next N classified pivots
+  forkBands: true                   # pitchfork 0.5/1.5/2.0 bands
+
+# --- experiment grid for the full sweep ---
+grid:
+  symbols: [BTC/USDT, ETH/USDT, SOL/USDT, XRP/USDT]    # cross-symbol validation
+  timeframes: [1h]                                       # 1h only — best PF/sample balance
+  entry_modes: [reversion]                               # best from prior runs
+  neely_gate: ["off"]                                    # fix neely off (alts saw no benefit)
+  vol_gate: ["off"]                                      # vol_gate is no-op for reversion
+  minPlanScore: [3.0, 4.0]
+  weight_preset: [default]
+  use_btc_bias: ["off", "on"]                            # A: cross-asset bias gate
+
+weight_presets:
+  default:    {wFib: 1.5, wDiag: 1.5, wFork: 1.0, wNeck: 0.5, wWick: 1.0, wFvg: 1.0, wDon: 1.0, wZone: 1.2, wOB: 1.2, wLT: 1.8}
+  fib_diag_emph: {wFib: 2.0, wDiag: 2.0, wFork: 1.0, wNeck: 0.5, wWick: 1.0, wFvg: 1.0, wDon: 1.0, wZone: 1.2, wOB: 1.2, wLT: 1.8}
+
+# --- MVP run (sanity first) ---
+mvp:
+  symbol: BTC/USDT
+  timeframe: 15m                   # natural trade-count increase
+  entry_mode: reversion
+  neely_gate: "off"
+  vol_gate: "on"
+  minPlanScore: 3.0
+  weight_preset: default
