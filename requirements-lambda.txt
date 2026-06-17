@@ -1,8 +1,8 @@
 # 거래소 API 연결 및 데이터 수집
 ccxt>=4.5.0
 
-# PostgreSQL 연동 (Postgres 15 버전 이상 지원)
+# PostgreSQL =
 psycopg2-binary==2.9.9
 
-# Gemini AI (analyzer Lambda용, 무료 티어 사용)
-google-generativeai>=0.5
+# GitHub Models API
+httpx>=0.27

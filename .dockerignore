@@ -1,0 +1,16 @@
+.git
+.venv
+venv
+src/.venv
+__pycache__
+*.pyc
+.env
+iac/
+.terraform/
+*.tfstate*
+node_modules
+.pytest_cache
+*.log
+.DS_Store
+tests/
+docs/

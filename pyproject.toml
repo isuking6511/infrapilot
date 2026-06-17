@@ -36,4 +36,4 @@ dev = ["ruff>=0.4", "mypy>=1.10", "pytest>=8.0", "pytest-asyncio>=0.23"]
 [project.scripts]
 infrapilot = "infrapilot.cli.main:cli"
 [tool.hatch.build.targets.wheel]
-packages = ["src/infrapilot"]
+packages = ["infrapilot"]

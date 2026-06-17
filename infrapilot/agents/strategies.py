@@ -18,7 +18,7 @@ class StrategistAgent(BaseAgent):
     def __init__(
         self,
         provider: LLMProvider,
-        strategies_dir: Path | str = "src/infrapilot/strategies",
+        strategies_dir: Path | str = "infrapilot/strategies",
     ) -> None:
         self._strategies_dir = Path(strategies_dir)
 

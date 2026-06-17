@@ -10,12 +10,12 @@ exchange = ccxt.bybit({
 
 
 def fetch_symbols(min_volume: float = 5_000_000) -> list[str]:
-    """거래대금 조건에 맞는 심볼 목록."""
+    """거래대금 조건에 맞는 USDT 무기한 선물 심볼 목록."""
     markets = _fetch_tickers_with_retry()
 
     symbols = []
     for symbol, ticker in markets.items():
-        if not (symbol.endswith("/USDT") or symbol.endswith("/USDT:USDT")):
+        if not _is_usdt_perp(symbol):
             continue
         if float(ticker.get("quoteVolume") or 0) >= min_volume:
             symbols.append(symbol)
@@ -23,13 +23,13 @@ def fetch_symbols(min_volume: float = 5_000_000) -> list[str]:
     return symbols
 
 
-def fetch_top_symbols(n: int = 50, min_volume: float = 1_000_000) -> list[str]:
-    """거래대금 상위 n개 심볼 (분석용)."""
+def fetch_top_symbols(n: int = 50, min_volume: float = 50_000_000) -> list[str]:
+    """거래대금 상위 n개 USDT 무기한 선물 심볼 (분석용). 일 50M USDT 이상."""
     markets = _fetch_tickers_with_retry()
 
     candidates = []
     for symbol, ticker in markets.items():
-        if not (symbol.endswith("/USDT") or symbol.endswith("/USDT:USDT")):
+        if not _is_usdt_perp(symbol):
             continue
         vol = float(ticker.get("quoteVolume") or 0)
         if vol >= min_volume:
@@ -37,6 +37,11 @@ def fetch_top_symbols(n: int = 50, min_volume: float = 1_000_000) -> list[str]:
 
     candidates.sort(key=lambda x: x[1], reverse=True)
     return [s for s, _ in candidates[:n]]
+
+
+def _is_usdt_perp(symbol: str) -> bool:
+    """BTC/USDT:USDT 형태만 True (Bybit USDT 무기한 선물)."""
+    return symbol.endswith("/USDT:USDT")
 
 
 def fetch_ohlcv(symbol: str, timeframe: str = "15m", limit: int = 200) -> list[dict]:

@@ -1,10 +1,4 @@
----
-# DB 접속 정보 (배포 전 직접 생성: kubectl create secret generic db-secret ...)
-# kubectl create secret generic db-secret \
-#   --from-literal=host=<RDS_ENDPOINT> \
-#   --from-literal=name=infrapilot \
-#   --from-literal=user=infrapilot \
-#   --from-literal=password=<PASSWORD>
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,9 +19,8 @@ spec:
         - name: ecr-secret
       containers:
         - name: dashboard
-          # 배포 전 실제 ECR URI로 교체 필요
-          # terraform output ecr_repository_url 로 확인
-          image: <ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/infrapilot-dashboard:latest
+
+          image: ${ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/infrapilot-dashboard:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

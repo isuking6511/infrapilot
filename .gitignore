@@ -27,3 +27,14 @@ iac/ansible/inventory/dev.yaml
 
 #env
 .env
+
+# Markdown
+CLAUDE.md
+infrapilot MAIC.md
+
+#blog
+bl*/    
+
+Makefile
+Dockerfile.dashboard
+Dockerfile.lambda
