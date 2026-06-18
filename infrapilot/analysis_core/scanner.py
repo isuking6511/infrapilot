@@ -63,6 +63,10 @@ class ScannerConfig:
     structure: StructureConfig = field(default_factory=StructureConfig)
     setup: SetupConfig = field(default_factory=SetupConfig)
     min_plan_score: dict[tuple[str, str], float] = field(default_factory=dict)
+    # 웹 랭킹용 TF별 근접 게이트(진입가가 현재가에서 N ATR 이내일 때만 셋업 인정).
+    # 비어있으면 setup.near_dist_atr(=10) 그대로 → 자동매매/백테스트 의미 유지.
+    # 값은 **튜닝값(검증 아님)** — 먼 강한 zone이 임박하지 않은데 상위에 뜨는 걸 막는 표시 규칙.
+    near_dist_atr_by_tf: dict[str, float] = field(default_factory=dict)
 
 
 def rank_score(score: float, distance_atr: float, k: float) -> float:
@@ -117,7 +121,9 @@ def _evaluate(inp: ScanInput, cfg: ScannerConfig) -> TickerRank:
     clusters = compute_clusters(eng.state, candles, bar, atr_last, cfg.structure)
 
     mps = cfg.min_plan_score.get((inp.symbol, inp.tf), cfg.setup.min_plan_score)
-    setup_cfg = replace(cfg.setup, min_plan_score=mps)
+    near = cfg.near_dist_atr_by_tf.get(inp.tf)   # 웹 랭킹용 TF 근접 게이트(없으면 기존값)
+    setup_cfg = replace(cfg.setup, min_plan_score=mps,
+                        near_dist_atr=near if near is not None else cfg.setup.near_dist_atr)
     s = make_setup(clusters, eng.state, close, atr_last, inp.bias, setup_cfg)
 
     if s is None:

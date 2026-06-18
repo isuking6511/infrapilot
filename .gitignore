@@ -38,3 +38,13 @@ bl*/
 Makefile
 Dockerfile.dashboard
 Dockerfile.lambda
+
+# Python
+__pycache__/
+*.pyc
+
+# scratch / temp
+ckascript.txt
+
+# large backtest data (커밋 안 함)
+research/backtest/insc-backtester/
