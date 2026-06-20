@@ -48,3 +48,6 @@ ckascript.txt
 
 # large backtest data (커밋 안 함)
 research/backtest/insc-backtester/
+
+# scanner_job 산출물 (재생성되는 랭킹 JSON — 추적 안 함)
+data/
