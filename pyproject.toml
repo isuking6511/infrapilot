@@ -22,6 +22,7 @@ dependencies = [
     "jinja2>=3.0",
     "rich>=13.0",
     "python-dotenv>=1.0",
+    "redis>=5.0",
     # anthropic, openai 제거 (optional로만)
 ]
 

@@ -22,6 +22,7 @@ import traceback
 from pathlib import Path
 
 import ccxt
+import redis
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -36,7 +37,12 @@ TFS = ["1d", "4h", "1h", "15m"]
 BARS = 200                 # TF당 수집 봉 수
 TOP_N_CANDLES = 15         # 캔들 배열을 payload에 담을 TF별 상위 종목 수(용량 절감)
 NEAR_GATE = {"15m": 2.5, "1h": 3.0, "4h": 4.0, "1d": 6.0}   # 웹 근접 게이트(튜닝값)
-OUT_PATH = Path(__file__).resolve().parents[1] / "data" / "rankings.json"
+OUT_PATH = Path(__file__).resolve().parents[1] / "data" / "rankings.json"   # (구 JSON 경로, 미사용)
+
+# Redis 저장소 (모듈 레벨 1회 생성, 하드코딩 X — 로컬=localhost / K8s=Service명 'redis')
+_redis = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"), port=int(os.getenv("REDIS_PORT", "6379")),
+                     decode_responses=True, socket_connect_timeout=3, socket_timeout=3)
+_TF_SEC = {"15m": 900, "1h": 3600, "4h": 14400, "1d": 86400}   # TTL=봉주기×2
 
 
 # ──────────────────────────── 수집 (확정봉) ────────────────────────────
@@ -140,14 +146,21 @@ def build_payload(by_tf, candles_by_sym, btc_bias, dead) -> dict:
 
 
 # ──────────────────────────── 저장 (교체 지점: JSON → 나중에 Redis) ────────────────────────────
-def save_rankings(data: dict, path: Path = OUT_PATH) -> None:
-    """지금은 JSON 파일(원자적 write). 나중에 Redis로 바꿀 땐 이 함수만 교체.
-    예) redis.set('rankings', json.dumps(data)) / TF별 ZADD 등."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=str(path.parent), suffix=".tmp")
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
-    os.replace(tmp, path)   # 원자적 교체(웹이 읽는 중 깨지지 않게)
+def save_rankings(data: dict) -> None:
+    """저장소(교체 지점) — Redis. TF별 분리 키 + TTL(봉주기×2). 값은 JSON 문자열.
+    load_rankings()가 이 키들을 모아 동일한 full dict로 재조립하므로 API는 불변.
+
+    키:  rankings:{tf}          = {meta(generated_at/exchange/quote/btc_bias), as_of_ts, ranking}
+         candles:{symbol}:{tf}  = [[ts,o,h,l,c,v], ...]  (상위15만)
+    """
+    meta = {k: data[k] for k in ("generated_at", "exchange", "quote", "btc_bias")}
+    for tf, t in data["timeframes"].items():
+        _redis.set(f"rankings:{tf}",
+                   json.dumps({**meta, "as_of_ts": t["as_of_ts"], "ranking": t["ranking"]}, ensure_ascii=False),
+                   ex=_TF_SEC.get(tf, 3600) * 2)
+    for sym, bytf in data["candles"].items():
+        for tf, arr in bytf.items():
+            _redis.set(f"candles:{sym}:{tf}", json.dumps(arr), ex=_TF_SEC.get(tf, 3600) * 2)
 
 
 # ──────────────────────────── 오케스트레이션 (골격) ────────────────────────────
@@ -207,8 +220,7 @@ def run(symbols=None, save=True) -> dict:
     payload = build_payload(by_tf, candles_by_sym, btc_bias, dead)
     if save:
         save_rankings(payload)
-        sz = OUT_PATH.stat().st_size
-        print(f"\n[저장] {OUT_PATH} ({sz/1024:.1f} KB)  generated_at={payload['generated_at']}")
+        print(f"\n[저장] Redis 갱신  generated_at={payload['generated_at']}  (rankings:* / candles:*)")
     return payload
 
 

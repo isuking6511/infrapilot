@@ -6,7 +6,10 @@
 """
 
 import json
+import os
 from pathlib import Path
+
+import redis
 
 from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, FileResponse
@@ -30,9 +33,10 @@ app.add_middleware(
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
-# ── 데이터 소스 (교체 지점) ──────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parents[2]
-RANKINGS_PATH = ROOT / "data" / "rankings.json"
+# ── 데이터 소스 (교체 지점: Redis) ──────────────────────────────────────────
+# 연결 객체 모듈 레벨 1회. 하드코딩 X — 로컬=localhost / K8s=Service명 'redis'.
+_redis = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"), port=int(os.getenv("REDIS_PORT", "6379")),
+                     decode_responses=True, socket_connect_timeout=3, socket_timeout=3)
 
 EXCHANGES = [
     {"id": "upbit", "active": True},
@@ -43,12 +47,29 @@ EXCHANGES = [
 
 
 def load_rankings() -> dict:
-    """랭킹 데이터 단일 소스. 지금은 rankings.json, 나중에 Redis로 이 함수만 교체.
-    (예: redis.get('rankings') → json.loads). 거래소 직접 호출은 하지 않는다."""
-    if not RANKINGS_PATH.exists():
-        raise HTTPException(status_code=503, detail="rankings 아직 없음 — scanner_job 먼저 실행")
-    with open(RANKINGS_PATH, encoding="utf-8") as f:
-        return json.load(f)
+    """랭킹 데이터 단일 소스(Redis). save_rankings가 넣은 TF별 키(rankings:{tf}, candles:{sym}:{tf})를
+    모아 기존과 동일한 full dict로 재조립 → API 라우트 불변. 거래소 직접 호출 X.
+
+    키 없으면(스캔 전/만료) 503, Redis 연결 실패도 503(빈 화면 말고 명확한 에러)."""
+    try:
+        tfs, meta = {}, {}
+        for tf in ("15m", "1h", "4h", "1d"):
+            raw = _redis.get(f"rankings:{tf}")
+            if raw:
+                o = json.loads(raw)
+                meta = o
+                tfs[tf] = {"as_of_ts": o["as_of_ts"], "ranking": o["ranking"]}
+        if not tfs:
+            raise HTTPException(status_code=503, detail="rankings 아직 없음 — scanner_job 먼저 실행")
+        candles: dict[str, dict] = {}
+        for key in _redis.scan_iter("candles:*"):
+            _, sym, tf = key.split(":", 2)   # symbol에 '/'(BTC/KRW)는 있어도 ':'는 없어 안전
+            val = _redis.get(key)
+            if val:
+                candles.setdefault(sym, {})[tf] = json.loads(val)
+        return {**meta, "timeframes": tfs, "candles": candles, "dead": []}
+    except redis.exceptions.RedisError as e:
+        raise HTTPException(status_code=503, detail=f"Redis 연결/조회 실패: {e}")
 
 
 def _short(symbol: str) -> str:
