@@ -6,3 +6,15 @@
     name: chrony
     state: restarted
 
+## sshd 설정(PasswordAuthentication/PermitRootLogin) 변경 시 재시작 (Ubuntu 서비스명=ssh)
+- name: restart sshd
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted
+
+## fail2ban jail 변경 시 재시작
+- name: restart fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: restarted
+

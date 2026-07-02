@@ -17,3 +17,28 @@
 - name: node output
   ansible.builtin.debug:
     msg: "{{ k3s_nodes.stdout_lines }}"
+
+# ubuntu 유저가 sudo 없이 kubectl 쓰게 — 루트 kubeconfig(600 유지)를 홈에 복사본으로.
+# (become:true라 root가 k3s.yaml을 읽어 /home/ubuntu에 쓸 수 있음)
+- name: ensure ~/.kube dir for ubuntu
+  ansible.builtin.file:
+    path: /home/ubuntu/.kube
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0700"
+
+- name: copy k3s kubeconfig to ubuntu home
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: /home/ubuntu/.kube/config
+    remote_src: true
+    owner: ubuntu
+    group: ubuntu
+    mode: "0600"
+
+- name: set KUBECONFIG for ubuntu login shells
+  ansible.builtin.lineinfile:
+    path: /home/ubuntu/.bashrc
+    line: 'export KUBECONFIG=$HOME/.kube/config'
+    state: present
