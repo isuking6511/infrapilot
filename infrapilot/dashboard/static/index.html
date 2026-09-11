@@ -31,8 +31,9 @@
   /* layout */
   main{display:grid;grid-template-columns:minmax(440px,520px) 1fr;height:calc(100% - 55px)}
   .left{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0}
-  .right{position:relative;overflow:hidden;background:#fff;min-width:0}
-  .right > div{position:absolute;inset:0}
+  .right{display:flex;flex-direction:column;background:#fff;min-width:0;min-height:0}
+  .stage{position:relative;overflow:hidden;flex:1;min-height:0}
+  .stage > div{position:absolute;inset:0}
 
   /* toolbar: tf tabs + search */
   .toolbar{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line)}
@@ -90,6 +91,24 @@
   .legend .lv{font-size:12px;color:var(--muted)} .legend .lv b{color:var(--text);margin-left:4px}
   #chartbox{flex:1;min-height:0;min-width:0}
 
+  /* 투표/댓글 */
+  .social{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:10px;height:200px;flex:none}
+  .votebox{display:flex;gap:8px}
+  .votebtn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:6px;background:#fff;padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .votebtn.buy{color:var(--buy)} .votebtn.sell{color:var(--sell)}
+  .votebtn:hover{background:var(--rowhover)}
+  .votebtn:disabled{opacity:.5;cursor:default}
+  .votebtn .n{font-variant-numeric:tabular-nums;color:var(--text)}
+  .commentform{display:flex;gap:8px}
+  .commentform input{flex:1;font:inherit;font-size:13px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:7px 11px;outline:none;color:var(--text)}
+  .commentform input:focus{border-color:#cbd2db;background:#fff}
+  .commentform button{font:inherit;font-size:13px;font-weight:600;border:0;border-radius:6px;background:var(--text);color:#fff;padding:7px 14px;cursor:pointer}
+  .commentform button:disabled{opacity:.5;cursor:default}
+  .commentlist{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:12px}
+  .commentlist .row{padding:6px 0;border-bottom:1px solid var(--line2)}
+  .commentlist .row .meta{color:var(--dim);font-size:11px;margin-bottom:2px}
+  .commentlist .empty2{color:var(--dim);text-align:center;padding:10px 0}
+
   @media(max-width:860px){
     main{display:block;height:auto}
     .left{border-right:0;border-bottom:1px solid var(--line)}
@@ -137,14 +156,27 @@
   </section>
 
   <section class="right" id="right">
-    <div id="ph" class="center">
-      <h2>종목을 선택하세요</h2>
-      <div>왼쪽 목록에서 종목을 누르면 캔들 차트와<br>진입·손절·목표가가 표시됩니다.</div>
+    <div class="stage" id="stage">
+      <div id="ph" class="center">
+        <h2>종목을 선택하세요</h2>
+        <div>왼쪽 목록에서 종목을 누르면 캔들 차트와<br>진입·손절·목표가가 표시됩니다.</div>
+      </div>
+      <div id="pending" class="center hide"></div>
+      <div id="chartview" class="hide">
+        <div class="legend" id="legend"></div>
+        <div id="chartbox"></div>
+      </div>
     </div>
-    <div id="pending" class="center hide"></div>
-    <div id="chartview" class="hide">
-      <div class="legend" id="legend"></div>
-      <div id="chartbox"></div>
+    <div id="social" class="social hide">
+      <div class="votebox">
+        <button id="voteBull" class="votebtn buy">📈 상승 <span class="n" id="bullCount">0</span></button>
+        <button id="voteBear" class="votebtn sell">📉 하락 <span class="n" id="bearCount">0</span></button>
+      </div>
+      <div class="commentform">
+        <input id="commentInput" type="text" maxlength="400" placeholder="의견을 남겨보세요 (최대 400자, 익명)" autocomplete="off" />
+        <button id="commentSubmit">등록</button>
+      </div>
+      <div id="commentList" class="commentlist"></div>
     </div>
   </section>
 </main>
@@ -277,6 +309,7 @@ function show(which){ // 'ph' | 'pending' | 'chart'
   $("#ph").classList.toggle("hide", which!=="ph");
   $("#pending").classList.toggle("hide", which!=="pending");
   $("#chartview").classList.toggle("hide", which!=="chart");
+  $("#social").classList.toggle("hide", which==="ph");
 }
 
 function setupRow(s){
@@ -289,7 +322,68 @@ function setupRow(s){
     <span class="k">RR</span><span class="v">${s.rr.toFixed(2)}</span></div>`;
 }
 
+/* ── 투표/댓글 ── */
+const esc = s => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+async function apiPost(p, body){
+  const r = await fetch(p, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  if(!r.ok){ const d = await r.json().catch(()=>({})); throw new Error(d.detail || (p+" "+r.status)); }
+  return r.json();
+}
+
+function fmtWhen(iso){
+  const d = new Date(iso), now = new Date();
+  const diffMin = Math.round((now-d)/60000);
+  if(diffMin < 1) return "방금";
+  if(diffMin < 60) return `${diffMin}분 전`;
+  if(diffMin < 1440) return `${Math.round(diffMin/60)}시간 전`;
+  return `${d.getMonth()+1}-${d.getDate()}`;
+}
+
+async function loadSocial(sym, tf){
+  try{
+    const [v, c] = await Promise.all([
+      api(`/api/votes/${tf}/${sym}`),
+      api(`/api/comments/${tf}/${sym}?limit=50`),
+    ]);
+    $("#bullCount").textContent = v.bull;
+    $("#bearCount").textContent = v.bear;
+    $("#commentList").innerHTML = c.comments.length
+      ? c.comments.map(x => `<div class="row"><div class="meta">${esc(x.author_hash.slice(0,8))} · ${fmtWhen(x.created_at)}</div><div>${esc(x.content)}</div></div>`).join("")
+      : `<div class="empty2">첫 댓글을 남겨보세요</div>`;
+  }catch(e){
+    $("#commentList").innerHTML = `<div class="empty2">불러오기 실패: ${esc(e.message)}</div>`;
+  }
+}
+
+async function castVote(direction){
+  if(!state.selected) return;
+  const btns=[$("#voteBull"),$("#voteBear")]; btns.forEach(b=>b.disabled=true);
+  try{
+    await apiPost("/api/vote", {symbol:state.selected, tf:state.tf, direction});
+    await loadSocial(state.selected, state.tf);
+  }catch(e){ alert("투표 실패: "+e.message); }
+  finally{ btns.forEach(b=>b.disabled=false); }
+}
+$("#voteBull").onclick = () => castVote(1);
+$("#voteBear").onclick = () => castVote(-1);
+
+async function submitComment(){
+  const input = $("#commentInput"), content = input.value.trim();
+  if(!content || !state.selected) return;
+  const btn = $("#commentSubmit"); btn.disabled = true; input.disabled = true;
+  try{
+    await apiPost("/api/comment", {symbol:state.selected, tf:state.tf, content});
+    input.value = "";
+    await loadSocial(state.selected, state.tf);
+  }catch(e){ alert("댓글 등록 실패: "+e.message); }
+  finally{ btn.disabled = false; input.disabled = false; input.focus(); }
+}
+$("#commentSubmit").onclick = submitComment;
+$("#commentInput").onkeydown = e => { if(e.key==="Enter") submitComment(); };
+
 async function selectSymbol(sym){
+  loadSocial(sym, state.tf);
   try{
     const d = await api(`/api/chart/${state.tf}/${sym}`);   // sym에 '/' 그대로(인코딩 X)
     const name = sym.split("/")[0], s=d.setup;
