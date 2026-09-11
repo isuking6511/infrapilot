@@ -113,3 +113,64 @@ def get_ohlcv(symbol: str, timeframe: str, limit: int = 100) -> list[dict]:
     cols = ["timestamp", "open", "high", "low", "close", "volume"]
     result = [dict(zip(cols, row)) for row in rows]
     return list(reversed(result))
+
+
+def cast_vote(symbol: str, timeframe: str, direction: int, voter_hash: str) -> None:
+    """찬(1)/반(-1) 투표. 같은 voter_hash가 다시 투표하면 기존 표를 갱신(누적 아님) —
+    "1인 1표" 원칙(voter_hash 단위, IP 우회는 못 막는 한계는 CLAUDE.md §5.4에 명시)."""
+    sql = """
+        INSERT INTO votes (symbol, timeframe, direction, voter_hash)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (symbol, timeframe, voter_hash) DO UPDATE SET
+            direction  = EXCLUDED.direction,
+            created_at = NOW()
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, (symbol, timeframe, direction, voter_hash))
+        conn.commit()
+
+
+def get_vote_summary(symbol: str, timeframe: str) -> dict:
+    """종목·TF의 찬/반 집계."""
+    sql = """
+        SELECT
+            COUNT(*) FILTER (WHERE direction = 1)  AS bull,
+            COUNT(*) FILTER (WHERE direction = -1) AS bear
+        FROM votes
+        WHERE symbol = %s AND timeframe = %s
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, (symbol, timeframe))
+            bull, bear = cur.fetchone()
+    return {"bull": bull, "bear": bear}
+
+
+def add_comment(symbol: str, timeframe: str, content: str, author_hash: str) -> None:
+    """댓글 저장. content 길이 검증은 호출자(API 레이어)가 이미 했다고 가정 —
+    DB VARCHAR(500)이 마지막 방어선."""
+    sql = """
+        INSERT INTO comments (symbol, timeframe, content, author_hash)
+        VALUES (%s, %s, %s, %s)
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, (symbol, timeframe, content, author_hash))
+        conn.commit()
+
+
+def get_comments(symbol: str, timeframe: str, limit: int = 50) -> list[dict]:
+    """최신순 댓글. XSS 방지(HTML 이스케이프)는 렌더링 시점(프론트)에서 처리."""
+    sql = """
+        SELECT content, author_hash, created_at
+        FROM comments
+        WHERE symbol = %s AND timeframe = %s
+        ORDER BY created_at DESC
+        LIMIT %s
+    """
+    cols = ["content", "author_hash", "created_at"]
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, (symbol, timeframe, limit))
+            return [dict(zip(cols, row)) for row in cur.fetchall()]
