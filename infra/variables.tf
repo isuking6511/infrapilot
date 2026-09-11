@@ -42,27 +42,3 @@ variable "az_b" {
   description = "Availability Zone B"
   default     = "ap-northeast-2b"
 }
-
-variable "db_username" {
-  type        = string
-  description = "RDS master username"
-}
-
-variable "db_password" {
-  type        = string
-  sensitive   = true
-  description = "RDS master password"
-}
-
-variable "gemini_api_key" {
-  type        = string
-  sensitive   = true
-  description = "Google Gemini API 키 (무료 티어)"
-}
-
-variable "copilot_token" {
-  type        = string
-  sensitive   = true
-  default     = ""
-  description = "GitHub Copilot OAuth 토큰 (선택)"
-}

@@ -14,7 +14,10 @@ spec:
     spec:
       containers:
       - name: web
-        image: 773320320276.dkr.ecr.ap-northeast-2.amazonaws.com/infrapilot-web:latest
+        # ECR pull은 K3s에서 인증 실패("no basic auth") → tar를 containerd에 직접 import한 로컬 이미지 사용.
+        # 왜 IfNotPresent: 이 이름은 레지스트리에 없으므로 pull 시도 금지, 노드에 import된 이미지만 쓰게.
+        image: docker.io/library/infrapilot-web:v1
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
         env:

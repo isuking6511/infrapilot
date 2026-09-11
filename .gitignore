@@ -49,5 +49,8 @@ ckascript.txt
 # large backtest data (커밋 안 함)
 research/backtest/insc-backtester/
 
+# containerd import용 로컬 이미지 tar (130MB+, ECR pull 인증 실패 우회용 — 재생성 가능)
+k3s/*.tar
+
 # scanner_job 산출물 (재생성되는 랭킹 JSON — 추적 안 함)
 data/

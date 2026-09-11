@@ -22,25 +22,7 @@ module "nat_security" {
   my_ip    = var.my_ip
 }
 
-module "lambda_sg" {
-  source = "./modules/lambda_security"
-  vpc_id = module.vpc.vpc_id
-}
 
-module "rds_security" {
-  source       = "./modules/rds_security"
-  vpc_id       = module.vpc.vpc_id
-  ec2_sg_id    = module.security.sg_id
-  lambda_sg_id = module.lambda_sg.sg_id
-}
-
-module "rds" {
-  source             = "./modules/rds"
-  db_username        = var.db_username
-  db_password        = var.db_password
-  private_subnet_ids = [module.vpc.private_subnet1_id, module.vpc.private_subnet2_id]
-  rds_sg_id          = module.rds_security.sg_id
-}
 
 module "ecr" {
   source = "./modules/ecr"
@@ -61,15 +43,5 @@ resource "aws_route" "private_nat" {
   network_interface_id   = module.compute.nat_instance_eni
 }
 
-module "lambda" {
-  source         = "./modules/lambda"
-  vpc_id         = module.vpc.vpc_id
-  subnet_ids     = [module.vpc.private_subnet1_id, module.vpc.private_subnet2_id]
-  ecr_image_uri  = "${module.ecr.repository_url}:latest"
-  db_host        = module.rds.db_endpoint
-  db_password    = var.db_password
-  lambda_sg_id   = module.lambda_sg.sg_id
-  gemini_api_key = var.gemini_api_key
-  copilot_token  = var.copilot_token
-}
+
 
