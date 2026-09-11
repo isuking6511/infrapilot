@@ -23,6 +23,26 @@ spec:
         env:
         - name: REDIS_HOST
           value: "redis"
+        # 투표/댓글(RDS) 접속 정보. 시크릿은 이미지에 안 굽고 K8s Secret에서 주입
+        # (CLAUDE.md §5.5). db-secret은 `kubectl create secret generic db-secret
+        # --from-literal=host=<terraform output db_endpoint> --from-literal=name=infrapilot
+        # --from-literal=user=<db_username> --from-literal=password=<db_password>
+        # --from-literal=vote-salt=<임의 랜덤 문자열>`로 미리 생성.
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef: {name: db-secret, key: host}
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef: {name: db-secret, key: name}
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef: {name: db-secret, key: user}
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: db-secret, key: password}
+        - name: VOTE_SALT
+          valueFrom:
+            secretKeyRef: {name: db-secret, key: vote-salt}
         resources:
           requests:
             memory: "150Mi"
