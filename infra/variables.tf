@@ -42,3 +42,14 @@ variable "az_b" {
   description = "Availability Zone B"
   default     = "ap-northeast-2b"
 }
+
+variable "db_username" {
+  type        = string
+  description = "RDS master username"
+}
+
+variable "db_password" {
+  type        = string
+  sensitive   = true
+  description = "RDS master password"
+}

@@ -22,7 +22,20 @@ module "nat_security" {
   my_ip    = var.my_ip
 }
 
+# 투표/댓글은 재생성 불가한 사용자 데이터라 캐시(Redis) 대신 RDS에 영속.
+module "rds_security" {
+  source    = "./modules/rds_security"
+  vpc_id    = module.vpc.vpc_id
+  ec2_sg_id = module.security.sg_id
+}
 
+module "rds" {
+  source             = "./modules/rds"
+  db_username        = var.db_username
+  db_password        = var.db_password
+  private_subnet_ids = [module.vpc.private_subnet1_id, module.vpc.private_subnet2_id]
+  rds_sg_id          = module.rds_security.sg_id
+}
 
 module "ecr" {
   source = "./modules/ecr"

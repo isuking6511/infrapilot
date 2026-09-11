@@ -18,3 +18,13 @@ output "ecr_repository_url" {
   description = "ecr repository url"
 }
 
+output "db_endpoint" {
+  value       = module.rds.db_endpoint
+  description = "RDS 접속 엔드포인트 (votes/comments)"
+}
+
+output "db_name" {
+  value       = module.rds.db_name
+  description = "RDS 데이터베이스 이름"
+}
+
