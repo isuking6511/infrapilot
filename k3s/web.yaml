@@ -54,8 +54,13 @@ kind: Service
 metadata:
   name: infrapilot-web
 spec:
+  # 기본값 ClusterIP였던 걸 NodePort로 변경 — 이거 없으면 클러스터 밖에서 접속 불가.
+  # 30080은 이미 SG(modules/security)에서 0.0.0.0/0으로 열어둔 포트(예전 dashboard.yaml과
+  # 동일 포트 재사용) — Terraform 변경 없이 바로 접속 가능.
+  type: NodePort
   selector:
     app:  infrapilot-web
   ports:
   - port:  8000
     targetPort:  8000
+    nodePort: 30080
