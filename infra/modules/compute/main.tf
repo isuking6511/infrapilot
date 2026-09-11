@@ -100,6 +100,14 @@ EOF
   tags = {
     Name = "infrapilot"
   }
+
+  # most_recent=true인 data.aws_ami는 Canonical이 새 빌드를 낼 때마다 id가 바뀐다.
+  # ami는 변경 불가 속성이라 그대로 두면 plan/apply 때마다 이 살아있는 K3s 노드가
+  # destroy→recreate(replace) 대상이 됨 — ignore_changes로 drift를 무시해 방지.
+  # AMI를 실제로 올리고 싶을 때는 이 줄을 잠깐 지우고 의도적으로 apply할 것.
+  lifecycle {
+    ignore_changes = [ami]
+  }
 }
 
 # NAT Instance - x86_64, t3.micro
@@ -140,5 +148,11 @@ EOF
 
   tags = {
     Name = "pilot-nat-instance"
+  }
+
+  # pilot_ec2와 동일한 이유(위 주석 참고) — NAT 인스턴스도 AMI drift로 재생성되면
+  # 안 됨(사설망 아웃바운드 전체가 끊김).
+  lifecycle {
+    ignore_changes = [ami]
   }
 }
