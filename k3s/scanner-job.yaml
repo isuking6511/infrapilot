@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: infrapilot-scanner-job
+spec:
+  # 가장 짧은 TF(15m) 봉마감 주기에 맞춤. scanner_job이 마지막(미마감) 봉을 자체적으로
+  # drop하고 확정봉만 쓰므로, 정각에 딱 안 맞고 몇 초 밀려도 결과는 항상 결정적.
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid          # 이전 실행이 안 끝났으면 겹쳐 돌리지 않음(중복 스캔 방지)
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1                # 실패해도 다음 15분 주기에 다시 도니 재시도는 최소화
+      activeDeadlineSeconds: 600      # 10분 넘게 걸리면 강제 종료(거래소 API 행 방지)
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: scanner-job
+            # web과 같은 이미지 재사용 — Dockerfile.web이 scripts/도 같이 COPY해서
+            # scanner_job.py가 이미 이미지 안에 있음(별도 빌드 불필요).
+            image: docker.io/library/infrapilot-web:v1
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/scanner_job.py"]
+            env:
+            - name: REDIS_HOST
+              value: "redis"
+            resources:
+              requests:
+                memory: "150Mi"
+              limits:
+                memory: "300Mi"

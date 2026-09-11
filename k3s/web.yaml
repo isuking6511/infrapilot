@@ -48,6 +48,16 @@ spec:
             memory: "150Mi"
           limits:
             memory: "250Mi"
+        # self-healing: liveness가 실패하면 kubelet이 컨테이너를 자동 재시작.
+        # readiness는 기동 중(모델/템플릿 로딩)엔 트래픽을 안 받다가 준비되면 받게.
+        livenessProbe:
+          httpGet: {path: /health, port: 8000}
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet: {path: /health, port: 8000}
+          initialDelaySeconds: 5
+          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
