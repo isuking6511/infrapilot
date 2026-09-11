@@ -5,11 +5,14 @@
 (구 LLM analyzer DB 라우트는 보존하되 import를 lazy화해 앱 기동이 DB에 안 묶이게 함.)
 """
 
+import hashlib
 import json
 import os
+import re
 from pathlib import Path
 
 import redis
+from pydantic import BaseModel, Field, field_validator
 
 from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, FileResponse
@@ -226,6 +229,135 @@ async def api_search(q: str = Query(..., min_length=1), limit: int = Query(60, g
                     e["setup_tfs"].append(tf)
     results = sorted(found.values(), key=lambda x: (-len(x["setup_tfs"]), x["symbol"]))[:limit]
     return {"query": q, "count": len(found), "results": results}
+
+
+# ── 투표/댓글 (RDS 영속 — 분석 랭킹과 달리 재생성 불가한 사용자 데이터) ─────────────
+SYMBOL_RE = re.compile(r"^[A-Z0-9]{1,15}/[A-Z]{2,10}$")
+
+
+def _client_ip(request: Request) -> str:
+    """NodePort/ClusterIP 앞에 프록시가 없는 지금 구성 기준 request.client.host 사용.
+    한계: 향후 Ingress/LB를 앞에 두면 X-Forwarded-For를 신뢰 가능한 프록시에서만
+    읽도록 다시 손봐야 함(스푸핑 방지) — 지금은 명시만 해둔다."""
+    return request.client.host if request.client else "unknown"
+
+
+def _anon_hash(ip: str) -> str:
+    """IP를 그대로 저장하지 않고 salt와 함께 해시 — 비가역, 그래도 같은 IP는 같은 값이라
+    '1인 1표/작성자 구분'에는 쓸 수 있다. IP 우회(재부팅·VPN)로 여러 표를 던지는 건 못 막는
+    한계가 있음(CLAUDE.md §5.4에 명시된 절충)."""
+    salt = os.environ.get("VOTE_SALT", "")
+    return hashlib.sha256(f"{ip}:{salt}".encode()).hexdigest()
+
+
+def _rate_limit(key: str, limit: int, window_sec: int) -> None:
+    """Redis INCR+EXPIRE 기반 고정 윈도우 rate limit. 이미 연결돼 있는 _redis를 재사용해
+    새 인프라 없이 스팸/남용을 완화(CLAUDE.md §5.4). Redis 장애 시엔 열어둔다(가용성 우선)."""
+    try:
+        n = _redis.incr(key)
+        if n == 1:
+            _redis.expire(key, window_sec)
+        if n > limit:
+            raise HTTPException(status_code=429, detail="너무 자주 요청함 — 잠시 후 다시 시도")
+    except redis.exceptions.RedisError:
+        return
+
+
+class VoteIn(BaseModel):
+    symbol: str
+    tf: str
+    direction: int
+
+    @field_validator("symbol")
+    @classmethod
+    def _valid_symbol(cls, v: str) -> str:
+        v = v.upper()
+        if not SYMBOL_RE.match(v):
+            raise ValueError("symbol 형식 오류 (예: BTC/KRW)")
+        return v
+
+    @field_validator("tf")
+    @classmethod
+    def _valid_tf(cls, v: str) -> str:
+        if v not in TF_SET:
+            raise ValueError(f"지원 TF: {sorted(TF_SET)}")
+        return v
+
+    @field_validator("direction")
+    @classmethod
+    def _valid_direction(cls, v: int) -> int:
+        if v not in (1, -1):
+            raise ValueError("direction은 1(상승) 또는 -1(하락)만 허용")
+        return v
+
+
+class CommentIn(BaseModel):
+    symbol: str
+    tf: str
+    content: str = Field(min_length=1, max_length=400)
+
+    @field_validator("symbol")
+    @classmethod
+    def _valid_symbol(cls, v: str) -> str:
+        v = v.upper()
+        if not SYMBOL_RE.match(v):
+            raise ValueError("symbol 형식 오류 (예: BTC/KRW)")
+        return v
+
+    @field_validator("tf")
+    @classmethod
+    def _valid_tf(cls, v: str) -> str:
+        if v not in TF_SET:
+            raise ValueError(f"지원 TF: {sorted(TF_SET)}")
+        return v
+
+    @field_validator("content")
+    @classmethod
+    def _stripped(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("내용이 비어있음")
+        return v
+
+
+@app.post("/api/vote")
+async def api_vote(body: VoteIn, request: Request):
+    from infrapilot.db.repository import cast_vote   # lazy: DB 없어도 앱 기동
+
+    ip_hash = _anon_hash(_client_ip(request))
+    _rate_limit(f"ratelimit:vote:{ip_hash}", limit=30, window_sec=60)
+    cast_vote(body.symbol, body.tf, body.direction, ip_hash)
+    return {"status": "ok"}
+
+
+@app.get("/api/votes/{tf}/{symbol:path}")
+async def api_votes(tf: str, symbol: str):
+    from infrapilot.db.repository import get_vote_summary   # lazy
+
+    if tf not in TF_SET:
+        raise HTTPException(status_code=404, detail=f"지원 TF: {sorted(TF_SET)}")
+    return {"symbol": symbol, "tf": tf, **get_vote_summary(symbol, tf)}
+
+
+@app.post("/api/comment")
+async def api_comment(body: CommentIn, request: Request):
+    from infrapilot.db.repository import add_comment   # lazy
+
+    ip_hash = _anon_hash(_client_ip(request))
+    _rate_limit(f"ratelimit:comment:{ip_hash}", limit=5, window_sec=60)
+    add_comment(body.symbol, body.tf, body.content, ip_hash)
+    return {"status": "ok"}
+
+
+@app.get("/api/comments/{tf}/{symbol:path}")
+async def api_comments(tf: str, symbol: str, limit: int = Query(50, ge=1, le=200)):
+    from infrapilot.db.repository import get_comments   # lazy
+
+    if tf not in TF_SET:
+        raise HTTPException(status_code=404, detail=f"지원 TF: {sorted(TF_SET)}")
+    # content는 여기서 그대로 반환 — XSS 방지는 프론트가 textContent로 렌더링할 때 처리
+    # (여기서 이스케이프하면 API를 다른 클라이언트가 쓸 때 이중 이스케이프될 수 있어서).
+    return {"symbol": symbol, "tf": tf, "comments": get_comments(symbol, tf, limit)}
 
 
 @app.get("/health")
