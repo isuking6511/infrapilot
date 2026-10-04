@@ -1,16 +1,8 @@
-.git
-.venv
-venv
-src/.venv
-__pycache__
-*.pyc
-.env
-iac/
-.terraform/
-*.tfstate*
-node_modules
-.pytest_cache
-*.log
-.DS_Store
-tests/
-docs/
+# 빌드 컨텍스트 최소화 — 이미지에 들어가는 건 pyproject.toml, infrapilot/, scripts/scanner_job.py 뿐
+*
+!pyproject.toml
+!infrapilot/
+!scripts/scanner_job.py
+**/__pycache__
+**/*.pyc
+**/.claude

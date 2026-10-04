@@ -7,3 +7,4 @@
     - base-hardening
     - k3s-install
     - network-config
+    - ecr-auth        # K3s용 ECR pull 인증 자동 갱신 (systemd timer)

@@ -1,9 +1,21 @@
+# InfraPilot 웹(FastAPI) — 랭킹(Redis) + 투표/댓글(RDS) 서빙.
+#
+# image의 __IMAGE__ 는 CD가 커밋 SHA 태그 ECR 이미지로 치환해서 apply 한다.
+# (수동 적용: `make k8s-apply IMAGE=<ecr_url>:<tag>` — 매니페스트 파일이 곧 클러스터 상태의 원본)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: infrapilot-web
+  labels:
+    app: infrapilot-web
 spec:
   replicas: 1
+  revisionHistoryLimit: 3          # rollout undo용 이전 버전 보관 (1GB 노드라 적게)
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1                  # 새 Pod가 Ready 된 뒤에 기존 Pod 종료 → 무중단
+      maxUnavailable: 0            # 트레이드오프: 교체 순간 Pod 2개분 메모리 필요(requests 150Mi×2로 산정)
   selector:
     matchLabels:
       app: infrapilot-web
@@ -11,23 +23,32 @@ spec:
     metadata:
       labels:
         app: infrapilot-web
+      annotations:
+        # 스크레이퍼(k3s/monitoring/alloy.yaml)가 찾는 표준 어노테이션
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
+      # ECR pull 시크릿. 노드의 systemd timer(Ansible ecr-auth 롤)가 6시간마다 갱신하고,
+      # CD도 배포 직전에 한 번 더 갱신한다. (예전: docker save → scp → ctr import 수동 우회)
+      imagePullSecrets:
+      - name: ecr-secret
+      securityContext:
+        runAsNonRoot: true         # Dockerfile.web의 appuser(uid 1000)로만 실행 허용
+        runAsUser: 1000
       containers:
       - name: web
-        # ECR pull은 K3s에서 인증 실패("no basic auth") → tar를 containerd에 직접 import한 로컬 이미지 사용.
-        # 왜 IfNotPresent: 이 이름은 레지스트리에 없으므로 pull 시도 금지, 노드에 import된 이미지만 쓰게.
-        image: docker.io/library/infrapilot-web:v1
-        imagePullPolicy: IfNotPresent
+        image: __IMAGE__
+        imagePullPolicy: IfNotPresent   # 태그가 커밋 SHA라 불변 → 노드에 있으면 재사용
         ports:
         - containerPort: 8000
+        securityContext:
+          allowPrivilegeEscalation: false
         env:
         - name: REDIS_HOST
           value: "redis"
-        # 투표/댓글(RDS) 접속 정보. 시크릿은 이미지에 안 굽고 K8s Secret에서 주입
-        # (CLAUDE.md §5.5). db-secret은 `kubectl create secret generic db-secret
-        # --from-literal=host=<terraform output db_endpoint> --from-literal=name=infrapilot
-        # --from-literal=user=<db_username> --from-literal=password=<db_password>
-        # --from-literal=vote-salt=<임의 랜덤 문자열>`로 미리 생성.
+        # 투표/댓글(RDS) 접속 정보. 시크릿은 이미지에 안 굽고 K8s Secret에서 주입(CLAUDE.md §5.5).
+        # db-secret 생성 방법은 docs/RUNBOOK.md 참고.
         - name: DB_HOST
           valueFrom:
             secretKeyRef: {name: db-secret, key: host}
@@ -48,29 +69,32 @@ spec:
             memory: "150Mi"
           limits:
             memory: "250Mi"
-        # self-healing: liveness가 실패하면 kubelet이 컨테이너를 자동 재시작.
-        # readiness는 기동 중(모델/템플릿 로딩)엔 트래픽을 안 받다가 준비되면 받게.
-        livenessProbe:
-          httpGet: {path: /health, port: 8000}
-          initialDelaySeconds: 10
-          periodSeconds: 30
+        # readiness: Ready 되기 전엔 트래픽을 안 받음 → CD의 rollout status가 "진짜 뜬 것"을 기준으로 판단.
+        # liveness: 응답이 없으면 kubelet이 컨테이너 재시작(self-healing).
         readinessProbe:
           httpGet: {path: /health, port: 8000}
           initialDelaySeconds: 5
-          periodSeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet: {path: /health, port: 8000}
+          initialDelaySeconds: 20
+          periodSeconds: 30
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: infrapilot-web
 spec:
-  # 기본값 ClusterIP였던 걸 NodePort로 변경 — 이거 없으면 클러스터 밖에서 접속 불가.
-  # 30080은 이미 SG(modules/security)에서 0.0.0.0/0으로 열어둔 포트(예전 dashboard.yaml과
-  # 동일 포트 재사용) — Terraform 변경 없이 바로 접속 가능.
+  # NodePort 30080 — SG(modules/security)에서 열어둔 포트. 접속: http://<ec2_public_ip>:30080
   type: NodePort
+  # ★ Local: kube-proxy가 출발지 IP를 SNAT하지 않아 앱이 실제 사용자 IP를 본다.
+  #   기본값 Cluster였을 땐 모든 요청이 노드 내부 IP로 보여서 투표 '1인 1표'와 rate limit이
+  #   "전체 사용자 = 한 사람"으로 걸리는 버그가 있었다. 단일 노드라 Local의 단점(Pod 없는
+  #   노드로 온 트래픽 드롭)도 해당 없음.
+  externalTrafficPolicy: Local
   selector:
-    app:  infrapilot-web
+    app: infrapilot-web
   ports:
-  - port:  8000
-    targetPort:  8000
+  - port: 8000
+    targetPort: 8000
     nodePort: 30080

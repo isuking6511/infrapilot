@@ -1,7 +1,6 @@
 """risk.position_size 검증 — v8 사이징 1:1 + 0나누기 방어."""
 from __future__ import annotations
 
-import math
 import random
 
 from infrapilot.analysis_core.models import Setup

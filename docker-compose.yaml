@@ -1,15 +1,22 @@
+# 로컬 개발용 의존성 (운영은 K3s의 Redis + RDS)
+#   docker compose up -d   →   make dev   →   http://localhost:8000
 services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]   # 캐시라 영속화 끔(운영과 동일)
+    ports:
+      - "6379:6379"
+
   postgres:
-    image: postgres:15
-    container_name: infrapilot-postgres
+    image: postgres:15            # 운영 RDS와 같은 메이저 버전
     environment:
-      POSTGRES_DB: infrapilot-db
+      POSTGRES_DB: infrapilot
       POSTGRES_USER: infrapilot
-      POSTGRES_PASSWORD: ${DB_PASSWORD}  # .env
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?.env에 DB_PASSWORD를 넣어주세요}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # 데이터 유지
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:

@@ -1,0 +1,90 @@
+# (선택) 경량 모니터링 — Grafana Alloy 1개가 웹 /metrics를 긁어 Grafana Cloud(무료 플랜)로 전송.
+#
+# 왜 이 구성인가:
+#   t4g.micro(1GB)에 Prometheus+Grafana를 직접 띄우면 그 둘만으로 메모리 절반 이상을 먹는다
+#   (Traefik이 OOM으로 죽었던 경험). 그래서 "수집기만 노드에, 저장·대시보드·알람은 외부 SaaS"로
+#   나눴다. 노드 부담은 Alloy 하나(limit 128Mi), 비용 $0(Grafana Cloud free: 10k series).
+#   트레이드오프: 외부 서비스 의존 + 노드→인터넷 아웃바운드 필요.
+#
+# 적용 전 1회 (Grafana Cloud > Connections > Prometheus 에서 값 확인):
+#   kubectl create secret generic grafana-cloud \
+#     --from-literal=url=https://prometheus-xxx.grafana.net/api/prom/push \
+#     --from-literal=username=<instance id> --from-literal=password=<access policy token>
+#   kubectl apply -f k3s/monitoring/alloy.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+data:
+  config.alloy: |
+    // 웹 Pod의 /metrics (HTTP 지표 + 스캐너 실행 지표 + Redis 상태)
+    prometheus.scrape "infrapilot_web" {
+      targets         = [{"__address__" = "infrapilot-web.default.svc.cluster.local:8000"}]
+      metrics_path    = "/metrics"
+      scrape_interval = "60s"
+      forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+    }
+
+    prometheus.remote_write "grafana_cloud" {
+      endpoint {
+        url = sys.env("GC_URL")
+        basic_auth {
+          username = sys.env("GC_USERNAME")
+          password = sys.env("GC_PASSWORD")
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alloy
+  labels:
+    app: alloy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alloy
+  template:
+    metadata:
+      labels:
+        app: alloy
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 473             # 이미지 기본 alloy 유저
+      containers:
+      - name: alloy
+        image: grafana/alloy:v1.4.3
+        args:
+        - run
+        - /etc/alloy/config.alloy
+        - --storage.path=/tmp/alloy
+        - --server.http.listen-addr=0.0.0.0:12345
+        env:
+        - name: GC_URL
+          valueFrom:
+            secretKeyRef: {name: grafana-cloud, key: url}
+        - name: GC_USERNAME
+          valueFrom:
+            secretKeyRef: {name: grafana-cloud, key: username}
+        - name: GC_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: grafana-cloud, key: password}
+        resources:
+          requests:
+            memory: "64Mi"
+          limits:
+            memory: "128Mi"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/alloy
+        - name: tmp
+          mountPath: /tmp/alloy
+      volumes:
+      - name: config
+        configMap:
+          name: alloy-config
+      - name: tmp
+        emptyDir: {}

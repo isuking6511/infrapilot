@@ -1,0 +1,16 @@
+#!/bin/bash
+# {{ ansible_managed }}
+# 인스턴스 Role로 ECR 토큰 발급 → default 네임스페이스의 ecr-secret 갱신 (멱등: apply)
+set -euo pipefail
+export PATH="/snap/bin:$PATH"
+REGION="{{ aws_region }}"
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+REGISTRY="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
+
+k3s kubectl create secret docker-registry ecr-secret \
+  --docker-server="${REGISTRY}" \
+  --docker-username=AWS \
+  --docker-password="$(aws ecr get-login-password --region "${REGION}")" \
+  --dry-run=client -o yaml | k3s kubectl apply -f -
+
+echo "ecr-secret refreshed for ${REGISTRY}"

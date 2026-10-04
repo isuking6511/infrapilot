@@ -1,11 +1,13 @@
 """scanner_job — 운영 배치 잡 (봉 마감 주기 실행 가정, 실시간 아님).
 
-흐름: 업비트 KRW 전종목 수집(확정봉) → analysis_core.scan() → save_rankings(JSON).
+흐름: 업비트 KRW 전종목 수집(확정봉) → analysis_core.scan() → save_rankings(Redis).
+실행: K3s CronJob(k3s/scanner-job.yaml, 15분 주기). 결과 요약은 scanner:last_run에 남겨
+웹의 /metrics가 대신 노출한다(짧게 끝나는 Job은 Prometheus가 직접 긁을 수 없어서).
 
 설계:
 - 확정봉: 마지막(미마감) 봉을 drop → candles[-1]이 '닫힌 봉'. bias/scan 전부 확정봉 기준 →
   실행마다 결정적(라이브 봉 깜빡임 제거). BTC bias도 BTC 확정봉으로 1회 산출해 알트에 주입.
-- save_rankings(data) 분리: 지금은 JSON 파일, 나중에 Redis로 이 함수만 교체.
+- save_rankings(data) 분리: JSON 파일 → Redis로 이 함수만 교체했고 API·스캔 로직은 0줄 변경.
 - 종목 실패 격리: 한 종목 예외가 전체를 막지 않음(dead-list).
 - analysis_core는 순수 — 이 잡(수집·저장·스케줄)이 바깥 레이어. 단방향 의존 유지.
 
@@ -16,7 +18,6 @@ from __future__ import annotations
 
 import json
 import os
-import tempfile
 import time
 import traceback
 from pathlib import Path
@@ -37,7 +38,6 @@ TFS = ["1d", "4h", "1h", "15m"]
 BARS = 200                 # TF당 수집 봉 수
 TOP_N_CANDLES = 15         # 캔들 배열을 payload에 담을 TF별 상위 종목 수(용량 절감)
 NEAR_GATE = {"15m": 2.5, "1h": 3.0, "4h": 4.0, "1d": 6.0}   # 웹 근접 게이트(튜닝값)
-OUT_PATH = Path(__file__).resolve().parents[1] / "data" / "rankings.json"   # (구 JSON 경로, 미사용)
 
 # Redis 저장소 (모듈 레벨 1회 생성, 하드코딩 X — 로컬=localhost / K8s=Service명 'redis')
 _redis = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"), port=int(os.getenv("REDIS_PORT", "6379")),
@@ -163,7 +163,20 @@ def save_rankings(data: dict) -> None:
             _redis.set(f"candles:{sym}:{tf}", json.dumps(arr), ex=_TF_SEC.get(tf, 3600) * 2)
 
 
-# ──────────────────────────── 오케스트레이션 (골격) ────────────────────────────
+def record_run(started_at: float, by_tf: dict, n_eval: dict, dead: list) -> None:
+    """실행 요약을 scanner:last_run에 남긴다(TTL 없음 — 마지막 성공 시각이 오래되면 그게 곧 알람 신호).
+    웹 /metrics의 ScannerCollector가 이 키를 읽어 Prometheus 게이지로 노출."""
+    stats = {
+        "finished_at": time.time(),
+        "duration_sec": round(time.time() - started_at, 1),
+        "evaluated": n_eval,
+        "setups": {tf: sum(1 for r in rows if r.setup is not None) for tf, rows in by_tf.items()},
+        "dead": len(dead),
+    }
+    _redis.set("scanner:last_run", json.dumps(stats))
+
+
+# ──────────────────────────── 오케스트레이션 ────────────────────────────
 def _arr(candles: list[Candle]) -> list[list]:
     return [[c.ts, c.open, c.high, c.low, c.close, c.volume] for c in candles]
 
@@ -173,6 +186,7 @@ def run(symbols=None, save=True) -> dict:
 
     웹 랭킹이므로 use_btc_bias=False(숏 차단은 자동매매 몫) → 양방향 랭킹. 종목 실패 격리.
     """
+    started_at = time.time()
     ex = ccxt.upbit({"enableRateLimit": True})
     if symbols is None:
         m = ex.load_markets()
@@ -181,6 +195,7 @@ def run(symbols=None, save=True) -> dict:
                         near_dist_atr_by_tf=NEAR_GATE)
 
     by_tf: dict[str, list] = {}
+    n_eval: dict[str, int] = {}
     candles_by_sym: dict[str, dict[str, list]] = {}
     dead: list[tuple] = []
     btc_bias = {"bull": None, "bear": None, "ref_close": None, "ref_bar_ts": None}
@@ -211,6 +226,7 @@ def run(symbols=None, save=True) -> dict:
             if sym != "BTC/KRW":
                 time.sleep(0.1)
 
+        n_eval[tf] = len(inputs)
         res = scan(inputs, cfg)
         by_tf[tf] = res.get(tf, [])
         n_setup = sum(1 for r in by_tf[tf] if r.setup is not None)
@@ -220,6 +236,7 @@ def run(symbols=None, save=True) -> dict:
     payload = build_payload(by_tf, candles_by_sym, btc_bias, dead)
     if save:
         save_rankings(payload)
+        record_run(started_at, by_tf, n_eval, dead)
         print(f"\n[저장] Redis 갱신  generated_at={payload['generated_at']}  (rankings:* / candles:*)")
     return payload
 

@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+# 토큰 수명 12시간의 절반마다 갱신 → 갱신이 한 번 실패해도 다음 주기 전까지 토큰이 살아있음
+[Unit]
+Description=Refresh ECR imagePullSecret every 6h
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=6h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

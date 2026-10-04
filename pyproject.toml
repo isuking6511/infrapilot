@@ -1,41 +1,48 @@
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
 [project]
 name = "infrapilot"
-version = "0.1.0"
-description = "거래소 시세 분석/시각화 플랫폼 (자동매매 아님) — 클라우드 네이티브 인프라 포트폴리오"
+version = "0.2.0"
+description = "내 차트 분석 기법을 코드로 수식화해 추천 종목을 올리는 서비스 — 직접 만든 클라우드 인프라 운영 포트폴리오"
 requires-python = ">=3.11"
+# 운영 이미지(Dockerfile.web)에 들어가는 것만. 웹·스캐너가 실제로 import하는 패키지 기준으로 정리.
+# (예전 목록의 pandas·ta·kubernetes·rich·click 등은 어디서도 import하지 않아 이미지만 키웠음
+#  → 1GB 노드 메모리·ECR 무료 500MB·CI 빌드 시간 모두에 불리해서 제거)
 dependencies = [
-    "click>=8.0",
     "fastapi>=0.110",
     "uvicorn>=0.29",
-    "httpx>=0.27",
-    "pyyaml>=6.0",
     "pydantic>=2.0",
-    "pydantic-settings>=2.0",
-    "prometheus-client>=0.20",
-    "kubernetes>=29.0",
-    "ccxt>=4.0",
-    "pandas>=2.0",
-    "ta>=0.11",
-    "jinja2>=3.0",
-    "rich>=13.0",
-    "python-dotenv>=1.0",
     "redis>=5.0",
-    "psycopg2-binary>=2.9",  # votes/comments RDS 접속 (repository.py) — 설치돼 있었지만 선언 누락
-    # anthropic, openai 제거 (optional로만)
+    "psycopg2-binary>=2.9",     # votes/comments RDS 접속 (db/repository.py)
+    "ccxt>=4.0",                # scanner_job 업비트 수집
+    "prometheus-client>=0.20",  # /metrics
 ]
 
 [project.optional-dependencies]
-claude = ["anthropic>=0.25"]
-openai = ["openai>=1.30"]
-gemini = ["google-generativeai>=0.5"]
-ollama = []
-all = ["anthropic>=0.25", "openai>=1.30", "google-generativeai>=0.5"]
-dev = ["ruff>=0.4", "mypy>=1.10", "pytest>=8.0", "pytest-asyncio>=0.23"]
+# AI 해석 레이어(agents/providers) — 운영 경로(웹·스캐너)에선 안 씀
+llm = ["httpx>=0.27", "python-dotenv>=1.0", "google-generativeai>=0.5"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+    "httpx>=0.27",      # FastAPI TestClient
+    "fakeredis>=2.20",  # Redis 없이 API 테스트
+    "numpy>=1.26",      # 골든 테스트의 참조 엔진(Pine 복제)이 사용
+    "pandas>=2.0",
+]
 
-[project.scripts]
-infrapilot = "infrapilot.cli.main:cli"
 [tool.hatch.build.targets.wheel]
 packages = ["infrapilot"]
+
+[tool.pytest.ini_options]
+# 전부 외부 의존성 0 (거래소·DB·API키 불필요) → 로컬과 CI가 같은 명령(pytest)으로 같은 결과
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["research", "_to_delete", "_cicd_draft"]
+
+[tool.ruff.lint]
+# CI 게이트: 문법 오류 + pyflakes(정의 안 된 이름, 안 쓰는 import 등)
+select = ["E9", "F"]

@@ -1,56 +1,46 @@
 # Terraform
 .terraform/
-*.tfstate
-*.tfstate.backup
+*.tfstate*         
 .terraform.lock.hcl
-iac/terraform.tfvars
+*.tfvars
 
 # Secrets
 *.pem
-*.tfvars
 .env
 
 # OS
 .DS_Store
 
-# Claude
-CLAUDE.md
-
-# MCP
-.mcp.json
-
-# Obsidian
-.obsidian/
-
-# Ansible
-iac/ansible/inventory/dev.yaml
-
-#env
-.env
-
-# Markdown
+# 로컬 전용 문서/설정
 CLAUDE.md
 infrapilot MAIC.md
+.mcp.json
+.obsidian/
+.claude/
+**/.claude/
 
-#blog
-bl*/    
+# Ansible — 퍼블릭 IP가 들어가는 실제 인벤토리 (예시는 dev.example.yaml)
+infra/ansible/inventory/dev.yaml
 
-Makefile
-Dockerfile.dashboard
-Dockerfile.lambda
+# blog 초안
+bl*/
 
 # Python
 __pycache__/
 *.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
 
 # scratch / temp
 ckascript.txt
+_to_delete/
 
-# large backtest data (커밋 안 함)
+# large backtest data 
 research/backtest/insc-backtester/
 
-# containerd import용 로컬 이미지 tar (130MB+, ECR pull 인증 실패 우회용 — 재생성 가능)
+# containerd import용 로컬 이미지 tar 
 k3s/*.tar
 
-# scanner_job 산출물 (재생성되는 랭킹 JSON — 추적 안 함)
+# scanner_job 
 data/

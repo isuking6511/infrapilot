@@ -1,0 +1,55 @@
+---
+# K3s(containerd)는 EKS와 달리 ECR 자동 인증이 없다. ECR 토큰은 12시간 만료라
+# imagePullSecret(ecr-secret)을 주기적으로 새로 만들어야 ImagePullBackOff가 안 난다.
+# → 노드의 인스턴스 Role(장기 키 없음)로 토큰을 받아 6시간마다 갱신하는 systemd timer.
+# (예전: 수동 crontab + k3s/ecr-login.sh, 그 전엔 docker save → scp → ctr import 우회)
+
+# Ubuntu 24.04엔 apt `awscli` 패키지가 없어서 snap으로 설치 (user_data의 apt 설치는 실패했었음)
+- name: install aws-cli (snap)
+  community.general.snap:
+    name: aws-cli
+    classic: true
+
+- name: ecr refresh script
+  ansible.builtin.template:
+    src: ecr-refresh.sh.j2
+    dest: /usr/local/bin/ecr-refresh.sh
+    mode: "0750"
+
+- name: ecr refresh systemd units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    mode: "0644"
+  loop:
+    - ecr-refresh.service
+    - ecr-refresh.timer
+  notify: reload systemd
+
+- name: flush handlers (daemon-reload before enabling timer)
+  ansible.builtin.meta: flush_handlers
+
+- name: enable ecr refresh timer
+  ansible.builtin.systemd:
+    name: ecr-refresh.timer
+    enabled: true
+    state: started
+
+- name: run once now (첫 배포 전에 ecr-secret이 있어야 Pod가 pull 가능)
+  ansible.builtin.systemd:
+    name: ecr-refresh.service
+    state: started
+  changed_when: false
+
+# 예전 수동 crontab 항목 제거 (systemd timer로 대체)
+- name: remove legacy ecr-login crontab line
+  ansible.builtin.shell: |
+    set -o pipefail
+    if crontab -u ubuntu -l 2>/dev/null | grep -q 'ecr-login.sh'; then
+      crontab -u ubuntu -l | grep -v 'ecr-login.sh' | crontab -u ubuntu -
+      echo removed
+    fi
+  args:
+    executable: /bin/bash
+  register: legacy_cron
+  changed_when: "'removed' in legacy_cron.stdout"

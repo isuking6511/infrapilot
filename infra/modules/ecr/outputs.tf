@@ -1,9 +1,9 @@
 output "repository_url" {
-  value       = aws_ecr_repository.lambda.repository_url
-  description = "ECR 리포지토리 URL (이미지 푸시할 때 사용)"
+  value       = aws_ecr_repository.web.repository_url
+  description = "웹/스캐너 이미지 ECR URL"
 }
 
-output "dashboard_repository_url" {
-  value       = aws_ecr_repository.dashboard.repository_url
-  description = "Dashboard ECR 리포지토리 URL"
+output "repository_arn" {
+  value       = aws_ecr_repository.web.arn
+  description = "웹/스캐너 이미지 ECR ARN (CI/CD 배포 Role 권한 범위)"
 }

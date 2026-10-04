@@ -187,6 +187,8 @@
 const TFS = ["15m","1h","4h","1d"];
 const state = { tf:"1h", limit:5, selected:null };
 const $ = s => document.querySelector(s);
+// innerHTML에 넣는 모든 외부 문자열(검색어·서버 에러·댓글)은 이스케이프 → XSS 차단
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 const won = n => n==null ? "—"
   : n>=1000 ? Math.round(n).toLocaleString()
@@ -241,7 +243,7 @@ async function loadRankings(){
     $("#rows").innerHTML = rows.map((r,i)=>row(r,i+1,maxS)).join("");
     bindRows();
     $("#more").textContent = state.limit<=5 ? "상위 60개 더보기" : "상위 5개만 보기";
-  }catch(e){ $("#empty").innerHTML=`<div class="empty">불러오기 실패: ${e.message}<br>scanner_job 먼저 실행</div>`; }
+  }catch(e){ $("#empty").innerHTML=`<div class="empty">불러오기 실패: ${esc(e.message)}<br>scanner_job 먼저 실행</div>`; }
 }
 
 function bindRows(){
@@ -263,7 +265,7 @@ $("#search").oninput=e=>{
     try{
       const d=await api(`/api/search?q=${encodeURIComponent(q)}`);
       $("#asof").textContent="검색";
-      if(!d.results.length){ $("#rows").innerHTML=""; $("#empty").innerHTML=`<div class="empty">"${q}" 결과 없음</div>`; return; }
+      if(!d.results.length){ $("#rows").innerHTML=""; $("#empty").innerHTML=`<div class="empty">"${esc(q)}" 결과 없음</div>`; return; }
       $("#empty").innerHTML="";
       $("#rows").innerHTML=d.results.map(r=>{
         const sym=r.symbol.split("/")[0];
@@ -273,7 +275,7 @@ $("#search").oninput=e=>{
           <td>${tag}</td><td class="price n">${won(r.close)}</td><td>—</td><td>—</td></tr>`;
       }).join("");
       bindRows();
-    }catch(err){ $("#empty").innerHTML=`<div class="empty">검색 실패: ${err.message}</div>`; }
+    }catch(err){ $("#empty").innerHTML=`<div class="empty">검색 실패: ${esc(err.message)}</div>`; }
   },250);
 };
 
@@ -323,7 +325,6 @@ function setupRow(s){
 }
 
 /* ── 투표/댓글 ── */
-const esc = s => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 async function apiPost(p, body){
   const r = await fetch(p, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
@@ -415,7 +416,7 @@ async function selectSymbol(sym){
         ${s ? setupRow(s) : `<div class="setupbox"><span class="k">상태</span><span class="v">셋업 없음(관망)</span></div>`}`;
       show("pending");
     }
-  }catch(e){ $("#pending").innerHTML=`<h2>불러오기 실패</h2><div>${e.message}</div>`; show("pending"); }
+  }catch(e){ $("#pending").innerHTML=`<h2>불러오기 실패</h2><div>${esc(e.message)}</div>`; show("pending"); }
 }
 
 (async function(){

@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 import random
 
-from infrapilot.analysis_core.models import Candle, PT_HIGH, PT_LOW
+from infrapilot.analysis_core.models import Candle
 from infrapilot.analysis_core.pivots import PivotEngine, detect_pivots
 
 

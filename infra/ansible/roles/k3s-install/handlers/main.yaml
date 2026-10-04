@@ -1,0 +1,6 @@
+---
+# k3s 재시작은 컨트롤 플레인만 재시작 — 실행 중인 Pod(containerd shim)는 그대로 유지된다.
+- name: restart k3s
+  ansible.builtin.systemd:
+    name: k3s
+    state: restarted

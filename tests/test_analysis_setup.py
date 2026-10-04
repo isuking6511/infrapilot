@@ -13,7 +13,7 @@ import random
 from infrapilot.analysis_core.models import LevelCluster, LevelSource, Pivot, PT_HIGH, PT_LOW
 from infrapilot.analysis_core.ict import StructureState, StructureConfig, StructureEngine
 from infrapilot.analysis_core.setup import (
-    SetupConfig, make_setup, _reversion_v4, compute_bias, resolve_direction,
+    SetupConfig, make_setup, _reversion_v4,
 )
 
 

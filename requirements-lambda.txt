@@ -1,8 +1,0 @@
-# 거래소 API 연결 및 데이터 수집
-ccxt>=4.5.0
-
-# PostgreSQL =
-psycopg2-binary==2.9.9
-
-# GitHub Models API
-httpx>=0.27

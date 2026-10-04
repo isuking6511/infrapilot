@@ -1,4 +1,27 @@
 ---
+# Traefik(Ingress) 비활성화: 웹은 NodePort(30080)로만 서비스해서 Ingress가 필요 없고,
+# 1GB 노드에서 Traefik이 OOM으로 죽었던 적도 있다 → 안 쓰는 컴포넌트는 끄고 메모리를 앱에 준다.
+# config.yaml은 설치 전/후 모두 적용됨(이미 설치된 노드는 k3s 재시작 시 Traefik이 제거됨).
+# 나중에 Ingress가 필요해지면 이 값을 false로 바꾸고 다시 실행.
+- name: k3s config dir
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    mode: "0755"
+
+- name: k3s config (disable unused components)
+  ansible.builtin.copy:
+    content: |
+      # managed by ansible (k3s-install role)
+      write-kubeconfig-mode: "0600"
+      {% if k3s_disable_traefik | default(true) %}
+      disable:
+        - traefik
+      {% endif %}
+    dest: /etc/rancher/k3s/config.yaml
+    mode: "0644"
+  notify: restart k3s
+
 - name: install k3s
   ansible.builtin.shell: |
     curl -sfL https://get.k3s.io | sh -
