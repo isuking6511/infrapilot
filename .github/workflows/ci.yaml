@@ -9,22 +9,25 @@ on:
     branches:
       - main
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-        name: Checkout 
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+          cache: 'pip'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-       
-      - name: Test
-        run: | 
-             python3 -m venv .venv && source .venv/bin/activate 
-             pip install -e ".[dev]" 
-             pytest -q
+          pip install -e ".[dev]"
 
+      - name: Lint
+        run: ruff check infrapilot/analysis_core infrapilot/dashboard infrapilot/db scripts tests
+
+      - name: Test
+        run: pytest -q
