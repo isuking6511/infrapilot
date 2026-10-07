@@ -32,3 +32,8 @@ output "db_name" {
   value       = module.rds.db_name
   description = "RDS 데이터베이스 이름"
 }
+
+output "github_actions_role_arn" {
+  value       = module.cicd.role_arn
+  description = "GitHub Variables의 AWS_ROLE_ARN에 넣을 값"
+}
