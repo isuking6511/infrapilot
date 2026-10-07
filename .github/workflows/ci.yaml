@@ -102,3 +102,19 @@ jobs:
 
       - name: Build
         run: docker build -f Dockerfile.web .
+  aws-auth:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test, terraform, ansible, manifests, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write         
+      contents: read
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}   
+          aws-region: ap-northeast-2
+
+      - name: Who am I
+        run: aws sts get-caller-identity               
