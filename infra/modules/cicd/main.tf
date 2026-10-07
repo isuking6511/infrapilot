@@ -1,7 +1,7 @@
 # OIDC PROVIDER
 resource "aws_iam_openid_connect_provider" "github" {
-  url            = "https://token.actions.githubusercontent.com"      
-  client_id_list = ["sts.amazonaws.com"]      
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
 }
 
 # IAM
@@ -12,12 +12,12 @@ resource "aws_iam_role" "github_actions" {
     Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
-      Principal = { Federated = aws_iam_openid_connect_provider.github.arn }          
-      Action    = "sts:AssumeRoleWithWebIdentity"                       
+      Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:ref:refs/heads/main"  
+          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:ref:refs/heads/main"
         }
       }
     }]
@@ -48,7 +48,7 @@ resource "aws_iam_role_policy" "ecr_push" {
           "ecr:CompleteLayerUpload",
           "ecr:PutImage",
         ]
-        Resource = var.ecr_repository_arn                         
+        Resource = var.ecr_repository_arn
       },
     ]
   })
