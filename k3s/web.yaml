@@ -38,8 +38,8 @@ spec:
         runAsUser: 1000
       containers:
       - name: web
-        image: __IMAGE__
-        imagePullPolicy: IfNotPresent   # 태그가 커밋 SHA라 불변 → 노드에 있으면 재사용
+        image: infrapilot-web   
+        imagePullPolicy: IfNotPresent   
         ports:
         - containerPort: 8000
         securityContext:

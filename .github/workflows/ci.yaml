@@ -92,7 +92,10 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
 
       - name: Validate
-        run: kubeconform -strict -summary k3s/*.yaml k3s/monitoring/*.yaml
+        run: kubeconform -strict -summary -skip Kustomization k3s/*.yaml k3s/monitoring/*.yaml
+
+      - name: Validate kustomize build
+        run: kubectl kustomize k3s | kubeconform -strict -summary -
 
   docker:
     runs-on: ubuntu-latest
