@@ -39,7 +39,7 @@ resource "aws_iam_role_policy" "ecr_push" {
         Resource = "*"
       },
       {
-        # 이미지 레이어 업로드 + 최종 등록
+        # 이미지 레이어 업로드 
         Effect = "Allow"
         Action = [
           "ecr:BatchCheckLayerAvailability",
@@ -47,6 +47,8 @@ resource "aws_iam_role_policy" "ecr_push" {
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload",
           "ecr:PutImage",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
         ]
         Resource = var.ecr_repository_arn
       },
