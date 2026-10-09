@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-24.04-arm                          
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5 
@@ -140,5 +140,20 @@ jobs:
           tags: ${{ steps.ecr.outputs.registry }}/infrapilot-web:${{ github.sha }}   
           cache-from: type=gha
           cache-to: type=gha,mode=max 
+      - name: Install kustomize
+        run: |
+          curl -sSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_arm64.tar.gz | tar xz
+          sudo mv kustomize /usr/local/bin/
 
+      - name: Update deploy branch
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/infrapilot-web:${{ github.sha }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C deploy                       # ② 브랜치 이름
+          cd k3s
+          kustomize edit set image infrapilot-web=$IMAGE
+          git commit -am "deploy: infrapilot-web ${GITHUB_SHA::7}"
+          git push --force origin deploy               # ③ 브랜치 이름
              
