@@ -3,10 +3,12 @@ kind: Kustomization
 
 # 배포 파티
 resources:
-  - redis.yaml
-  - web.yaml
-  - scanner-job.yaml
+- redis.yaml
+- web.yaml
+- scanner-job.yaml
 
 # image
 images:
-  - name: infrapilot-web
+- name: infrapilot-web
+  newName: 477537078211.dkr.ecr.ap-northeast-2.amazonaws.com/infrapilot-web
+  newTag: e2d6ac4099483e1383d5e9601ec57e01c43da62c
