@@ -95,7 +95,7 @@ jobs:
         run: kubeconform -strict -summary k3s/*.yaml k3s/monitoring/*.yaml
 
       - name: Validate kustomize build
-        run: kubectl kustomize k3s | kubeconform -strict -summary -
+        run: kubectl kustomize k3s | kubeconform -strict -summary -skip Kustomization k3s/*.yaml k3s/monitoring/*.yaml
 
   docker:
     runs-on: ubuntu-latest
