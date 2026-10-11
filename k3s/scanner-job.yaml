@@ -3,19 +3,20 @@ kind: CronJob
 metadata:
   name: infrapilot-scanner-job
 spec:
-  # 가장 짧은 TF(15m) 봉마감 주기에 맞춤. scanner_job이 마지막(미마감) 봉을 자체적으로
-  # drop하고 확정봉만 쓰므로, 정각에 딱 안 맞고 몇 초 밀려도 결과는 항상 결정적.
+ 
   schedule: "*/15 * * * *"
-  concurrencyPolicy: Forbid          # 이전 실행이 안 끝났으면 겹쳐 돌리지 않음(중복 스캔 방지)
+  concurrencyPolicy: Forbid          
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
-      backoffLimit: 1                # 실패해도 다음 15분 주기에 다시 도니 재시도는 최소화
-      activeDeadlineSeconds: 600     # 10분 넘게 걸리면 강제 종료(거래소 API 행 방지)
-      ttlSecondsAfterFinished: 3600  # 끝난 Job/Pod 객체 정리(단일 노드 etcd·메모리 절약)
+      
+      backoffLimit: 1                
+      activeDeadlineSeconds: 600     
+      ttlSecondsAfterFinished: 3600  
       template:
         spec:
+          enableServiceLinks: false
           restartPolicy: Never
           imagePullSecrets:
           - name: ecr-secret
