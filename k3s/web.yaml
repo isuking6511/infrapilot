@@ -29,8 +29,7 @@ spec:
         prometheus.io/port: "8000"
         prometheus.io/path: "/metrics"
     spec:
-      # ECR pull 시크릿. 노드의 systemd timer(Ansible ecr-auth 롤)가 6시간마다 갱신하고,
-      # CD도 배포 직전에 한 번 더 갱신한다. (예전: docker save → scp → ctr import 수동 우회)
+      enableServiceLinks: false
       imagePullSecrets:
       - name: ecr-secret
       securityContext:
