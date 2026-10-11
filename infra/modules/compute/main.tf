@@ -42,16 +42,14 @@ resource "aws_iam_instance_profile" "k3s_ec2" {
 # 메인 EC2 (K3s) - arm64
 resource "aws_instance" "pilot_ec2" {
   ami                         = data.aws_ami.ubuntu_arm64.id
-  instance_type               = "t4g.micro"
+  instance_type               = "t4g.small"
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [var.sg_id]
   key_name                    = var.key_name
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.k3s_ec2.name
 
-  # 주의: user_data를 고치면 AWS가 인스턴스를 stop→start 해서 퍼블릭 IP가 바뀐다.
-  # 그래서 살아있는 노드의 user_data는 건드리지 않고, 추가 설정은 Ansible로 한다.
-  # (Ubuntu 24.04엔 apt `awscli` 패키지가 없어 아래 설치는 실패함 → Ansible ecr-auth 롤이 snap으로 설치)
+
   user_data = <<-EOF
 #!/bin/bash
 fallocate -l 1G /swapfile
