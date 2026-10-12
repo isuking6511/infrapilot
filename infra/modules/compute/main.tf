@@ -42,7 +42,7 @@ resource "aws_iam_instance_profile" "k3s_ec2" {
 # 메인 EC2 (K3s) - arm64
 resource "aws_instance" "pilot_ec2" {
   ami                         = data.aws_ami.ubuntu_arm64.id
-  instance_type               = "t4g.micro"
+  instance_type               = "t4g.small"
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [var.sg_id]
   key_name                    = var.key_name
@@ -83,3 +83,9 @@ EOF
     ignore_changes = [ami]
   }
 }
+# SSM Session Manager: SSH 포트·IP 화이트리스트 없이 IAM 인증으로 노드 접속
+resource "aws_iam_role_policy_attachment" "k3s_ssm" {
+  role       = aws_iam_role.k3s_ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
