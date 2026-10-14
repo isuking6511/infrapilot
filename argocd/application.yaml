@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infrapilot
+  namespace: argocd
+
+spec:
+  # The project the application belongs to.
+  project: default
+
+  # Source of the application manifests
+  source:
+    repoURL: https://github.com/isuking6511/infrapilot.git 
+    targetRevision: deploy  # CI 봇이 이미지 태그를 갱신하는 주문서 브랜치
+    path: k3s   # kustomization.yaml이 있는 폴더 → ArgoCD가 kustomize로 렌더링
+
+  # Destination cluster and namespace to deploy the application
+  destination:
+    # cluster API URL
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  # Extra information to show in the Argo CD Application details tab
+  info:
+    - name: 'Example:'
+      value: 'https://example.com'
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
