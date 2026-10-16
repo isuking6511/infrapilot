@@ -43,6 +43,15 @@ module "compute" {
   key_name  = var.key_name
 }
 
+# 모니터링 
+module "monitoring" {
+  source    = "./modules/monitoring"
+  vpc_id    = module.vpc.vpc_id
+  subnet_id = module.vpc.public_subnet1_id
+  k3s_sg_id = module.security.sg_id
+  key_name  = var.key_name
+}
+
 module "cicd" {
   source             = "./modules/cicd"
   ecr_repository_arn = module.ecr.repository_arn

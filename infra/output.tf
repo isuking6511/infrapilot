@@ -37,3 +37,10 @@ output "github_actions_role_arn" {
   value       = module.cicd.role_arn
   description = "GitHub Variables의 AWS_ROLE_ARN에 넣을 값"
 }
+output "monitoring_private_ip" {
+  value = module.monitoring.private_ip
+}
+
+output "monitoring_instance_id" {
+  value = module.monitoring.instance_id
+}
