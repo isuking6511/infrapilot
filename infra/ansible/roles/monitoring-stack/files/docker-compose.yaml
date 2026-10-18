@@ -1,0 +1,39 @@
+services:
+  victoriametrics:              # 지표 저장 (Prometheus 호환, 메모리 적게 씀)
+    image: victoriametrics/victoria-metrics:v1.118.0
+    command:
+      - -storageDataPath=/storage
+      - -retentionPeriod=15d    # 15일 지난 지표는 자동 삭제 → 디스크 상한
+    ports:
+      - "8428:8428"             # K3s 노드의 Alloy가 보냄 (SG가 K3s 노드만 허용)
+    volumes:
+      - vm-data:/storage
+    mem_limit: 200m
+    restart: unless-stopped
+
+  loki:                         # 로그 저장
+    image: grafana/loki:3.5.1
+    command: -config.file=/etc/loki/config.yaml
+    ports:
+      - "3100:3100"             # K3s 노드의 Alloy가 보냄 (SG가 K3s 노드만 허용)
+    volumes:
+      - ./loki-config.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+    mem_limit: 300m
+    restart: unless-stopped
+
+  grafana:                      # 대시보드·알림
+    image: grafana/grafana:12.0.2
+    ports:
+      - "127.0.0.1:3000:3000"   # 서버 내부에서만 열림 → 접속은 SSM 포트포워딩으로
+    volumes:
+      - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - grafana-data:/var/lib/grafana
+    mem_limit: 200m
+    restart: unless-stopped
+    depends_on: [victoriametrics, loki]
+
+volumes:
+  vm-data: {}
+  loki-data: {}
+  grafana-data: {}
