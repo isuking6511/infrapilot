@@ -1,0 +1,29 @@
+---
+# 맥에 있는 compose·설정 파일을 서버로 복사하고 컨테이너를 띄운다.
+- name: create monitoring directory
+  ansible.builtin.file:
+    path: /opt/monitoring
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: copy compose and config files
+  ansible.builtin.copy:
+    src: "{{ item }}"                       # roles/monitoring-stack/files/ 안에서 찾음
+    dest: "/opt/monitoring/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - docker-compose.yaml
+    - loki-config.yaml
+    - grafana-datasources.yaml
+  notify: recreate monitoring stack         # 파일 내용이 바뀌었을 때만 컨테이너 재생성
+
+- name: start monitoring stack
+  ansible.builtin.command: docker compose up -d
+  args:
+    chdir: /opt/monitoring
+  register: compose_up
+  changed_when: "'Created' in compose_up.stderr or 'Started' in compose_up.stderr"

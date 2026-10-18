@@ -1,0 +1,34 @@
+# Loki 단일 바이너리 설정 — 서버 1대, 로컬 디스크 저장, 보관 7일
+auth_enabled: false            # 멀티테넌트 끔 (혼자 쓰고, SG로 K3s 노드만 접근 가능)
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:                # S3 같은 외부 저장소 대신 로컬 디스크(볼륨)에 저장
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1        # 복제 없음 (서버 1대)
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:                 # 로그를 어떤 형식으로 저장할지 (Loki 3 권장 형식)
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h            # 하루 단위로 묶어서 저장 → 하루 단위로 지울 수 있음
+
+limits_config:
+  retention_period: 168h       # 7일 지난 로그는 삭제
+
+compactor:                     # 실제로 오래된 로그를 지우는 담당
+  working_directory: /loki/compactor
+  retention_enabled: true      # 이걸 켜야 위의 retention_period가 실제로 동작
+  delete_request_store: filesystem

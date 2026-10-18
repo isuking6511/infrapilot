@@ -1,0 +1,5 @@
+---
+- name: recreate monitoring stack
+  ansible.builtin.command: docker compose up -d --force-recreate
+  args:
+    chdir: /opt/monitoring

@@ -1,10 +1,21 @@
 ---
 - name: infra pilot
-  hosts: k3s-server
+  hosts: k3s
   become: true
-
   roles:
     - base-hardening
     - k3s-install
     - network-config
-    - ecr-auth        # K3s용 ECR pull 인증 자동 갱신 (systemd timer)
+    - ecr-auth
+- name: monitoring node
+  hosts: monitoring
+  become: true
+  
+  roles:
+      - docker
+      - base-hardening
+      - monitoring-stack
+
+
+
+

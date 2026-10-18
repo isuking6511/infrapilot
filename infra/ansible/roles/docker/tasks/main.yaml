@@ -1,0 +1,19 @@
+---
+- name: install docker and compose plugin
+  ansible.builtin.apt:
+    name: [docker.io, docker-compose-v2]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: enable and start docker
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true      
+    state: started
+
+- name: allow ubuntu user to run docker without sudo
+  ansible.builtin.user:
+    name: ubuntu
+    groups: docker
+    append: true      
