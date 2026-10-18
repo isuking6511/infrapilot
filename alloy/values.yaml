@@ -1,0 +1,89 @@
+controller:
+  type: deployment
+  replicas: 1
+
+alloy:
+  resources:
+    requests: { memory: 64Mi }
+    limits:   { memory: 256Mi }   # 앱·ArgoCD와 같은 노드라 상한 필수
+  configMap:
+    content: |
+      // ===== 보낼 곳: 모니터링 노드 (SG가 K3s 노드에서 오는 8428·3100만 허용) =====
+      prometheus.remote_write "monitoring" {
+        endpoint { url = "http://10.0.1.11:8428/api/v1/write" }
+        external_labels = { cluster = "infrapilot" }
+      }
+
+      loki.write "monitoring" {
+        endpoint { url = "http://10.0.1.11:3100/loki/api/v1/push" }
+        external_labels = { cluster = "infrapilot" }
+      }
+
+      // ===== 지표: kubelet의 cAdvisor (노드·컨테이너 CPU, 메모리) =====
+      discovery.kubernetes "nodes" {
+        role = "node"
+      }
+
+      discovery.relabel "cadvisor" {
+        targets = discovery.kubernetes.nodes.targets
+        rule {
+          target_label = "__address__"
+          replacement  = "kubernetes.default.svc:443"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_node_name"]
+          target_label  = "__metrics_path__"
+          replacement   = "/api/v1/nodes/$1/proxy/metrics/cadvisor"
+        }
+      }
+
+      prometheus.scrape "cadvisor" {
+        targets           = discovery.relabel.cadvisor.output
+        scheme            = "https"
+        scrape_interval   = "60s"
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+        tls_config {
+          ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        }
+        forward_to = [prometheus.relabel.keep_needed.receiver]
+      }
+
+      // 필요한 지표만 남김 (시계열 개수 = 메모리·디스크 사용량)
+      prometheus.relabel "keep_needed" {
+        rule {
+          source_labels = ["__name__"]
+          regex         = "container_cpu_usage_seconds_total|container_memory_working_set_bytes|container_spec_memory_limit_bytes|container_oom_events_total|machine_memory_bytes|machine_cpu_cores"
+          action        = "keep"
+        }
+        forward_to = [prometheus.remote_write.monitoring.receiver]
+      }
+
+      // ===== 로그: 모든 파드의 로그 =====
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label  = "app"
+        }
+      }
+
+      loki.source.kubernetes "pods" {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.monitoring.receiver]
+      }
