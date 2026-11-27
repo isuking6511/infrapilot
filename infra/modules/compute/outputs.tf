@@ -15,3 +15,7 @@ output "ssh_command" {
   value       = "ssh -i ~/.ssh/${var.key_name}.pem ubuntu@${aws_instance.pilot_ec2.public_ip}"
   description = "description for ssh command"
 }
+
+output "k3s_public_ip" {
+  value = aws_eip.k3s.public_ip
+}

@@ -58,3 +58,8 @@ module "cicd" {
   github_repo        = "isuking6511/infrapilot"
 }
 
+module "dns" {
+  source      = "./modules/dns"
+  domain_name = "pickboard.site"
+  target_ip   = module.compute.k3s_public_ip
+}

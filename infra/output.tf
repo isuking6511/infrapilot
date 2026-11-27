@@ -44,3 +44,7 @@ output "monitoring_private_ip" {
 output "monitoring_instance_id" {
   value = module.monitoring.instance_id
 }
+
+output "name_servers" {
+  value = module.dns.name_servers
+}
