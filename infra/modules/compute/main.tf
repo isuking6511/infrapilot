@@ -95,6 +95,6 @@ resource "aws_eip" "k3s" {
 }
 
 resource "aws_eip_association" "k3s" {
-  instance_id   = aws_instance.pilot_ec2.id  # 모듈 안 K3s 인스턴스 리소스 이름에 맞춰
+  instance_id   = aws_instance.pilot_ec2.id # 모듈 안 K3s 인스턴스 리소스 이름에 맞춰
   allocation_id = aws_eip.k3s.id
 }

@@ -1,7 +1,7 @@
 variable "domain_name" {
-  type        = string
+  type = string
 }
 
 variable "target_ip" {
-  type        = string
+  type = string
 }
