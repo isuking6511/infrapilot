@@ -59,7 +59,15 @@ module "cicd" {
 }
 
 module "dns" {
-  source      = "./modules/dns"
-  domain_name = "pickboard.site"
-  target_ip   = module.compute.k3s_public_ip
+  source                 = "./modules/dns"
+  domain_name            = "pickboard.site"
+  cloudfront_domain_name = module.edge.cloudfront_domain_name
+  cloudfront_zone_id     = module.edge.cloudfront_zone_id
+}
+
+module "edge" {
+  source        = "./modules/edge"
+  domain_name   = "pickboard.site"
+  zone_id       = module.dns.zone_id
+  origin_domain = module.compute.k3s_public_dns
 }
