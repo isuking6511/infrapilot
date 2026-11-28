@@ -11,6 +11,7 @@ terraform {
 
 
 
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -19,11 +20,10 @@ terraform {
   }
 }
 
-# Configure the AWS Provider
 provider "aws" {
   region = "ap-northeast-2"
 
-  # 모든 리소스에 공통 태그 → Cost Explorer에서 Project 태그로 이 프로젝트 비용만 필터링.
+
   default_tags {
     tags = {
       Project   = "infrapilot"

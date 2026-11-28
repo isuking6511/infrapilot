@@ -48,3 +48,7 @@ output "monitoring_instance_id" {
 output "name_servers" {
   value = module.dns.name_servers
 }
+
+output "cloudfront_domain_name" {
+  value = module.edge.cloudfront_domain_name
+}
