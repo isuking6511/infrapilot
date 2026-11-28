@@ -6,6 +6,8 @@ resources:
   - redis.yaml
   - web.yaml
   - scanner-job.yaml
+  - ingress.yaml
+  
 
 # image
 images:
